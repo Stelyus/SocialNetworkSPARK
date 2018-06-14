@@ -1,0 +1,12 @@
+{
+    "namespace": "kakfa-avro.post",
+     "type": "record",
+     "name": "post",
+     "fields":[
+         {   "name": "id", "type": "string"},
+         {   "name": "updatedOn",  "type": "long"},
+         {   "name": "author", "type": "string"},
+         {   "name": "text", "type": "string"},
+         {   "name": "deleted", "type": "boolean"}
+     ]
+}
