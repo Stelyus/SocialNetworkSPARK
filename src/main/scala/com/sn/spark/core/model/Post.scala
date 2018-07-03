@@ -16,7 +16,7 @@ case class Id[Resource](value: String) extends AnyVal
 case class Post(id: Id[Post], updatedOn: Instant, author: Id[User], text: String, deleted: Boolean) {
   override def toString(): String = {
     "id: " + id.value + System.lineSeparator() +
-    "updatedOn" + updatedOn.getEpochSecond() + System.lineSeparator() +
+    "updatedOn: " + updatedOn.getEpochSecond() + System.lineSeparator() +
     "author: " + author.value + System.lineSeparator() +
     "text: " + text + System.lineSeparator()
   }

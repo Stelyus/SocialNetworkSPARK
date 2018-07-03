@@ -15,7 +15,7 @@ object PostConsumer extends Consumer {
         while (true) {
           val records: ConsumerRecords[String, Array[Byte]] = consumer.poll(1000)
           for (record <- records) {
-            System.out.println(record.key())
+            System.out.println("key: " + record.key())
             val p: Post = deserialize(record.value())
             System.out.println(p.toString())
           }

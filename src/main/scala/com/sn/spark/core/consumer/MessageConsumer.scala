@@ -1,4 +1,5 @@
 package com.sn.spark.core.consumer
+
 import java.util.Collections
 import java.util.concurrent.Executors
 
@@ -16,9 +17,9 @@ object MessageConsumer extends Consumer {
         while (true) {
           val records: ConsumerRecords[String, Array[Byte]] = consumer.poll(1000)
           for (record <- records) {
-            System.out.println(record.key())
+            System.out.println("key: " + record.key())
             val msg: Message = deserializeMessage(record.value())
-            System.out.println(msg.toString())
+            System.out.println("msg: " + msg.toString())
           }
         }
       }
