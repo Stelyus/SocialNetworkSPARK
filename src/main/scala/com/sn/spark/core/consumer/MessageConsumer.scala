@@ -22,5 +22,6 @@ object MessageConsumer extends Consumer {
           }
         }
       }
+    })
   }
 }

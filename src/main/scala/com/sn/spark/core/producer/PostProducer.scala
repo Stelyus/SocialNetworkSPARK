@@ -1,12 +1,9 @@
 package com.sn.spark.core.producer
-
-import java.time.Instant
 import java.util.concurrent.Future
-import java.util.{Properties, UUID}
 
-import com.sn.spark.core.model.{Id, Post, User}
+import com.sn.spark.core.model.{Post}
 import com.sn.spark.core.model.Post._
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord, RecordMetadata}
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord, RecordMetadata}
 
 object PostProducer extends Producer {
   override def send[T](topic: String, data: T, producer: KafkaProducer[String, Array[Byte]]): Unit = {
