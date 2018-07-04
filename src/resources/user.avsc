@@ -1,0 +1,15 @@
+
+{
+    "namespace": "kakfa-avro.user",
+     "type": "record",
+     "name": "user",
+     "fields":[
+         {   "name": "id", "type": "string"},
+         {   "name": "firstName",  "type": "string"},
+         {   "name": "lastName",  "type": "string"},
+         {   "name": "email",  "type": "string"},
+         {   "name": "nickname", "type": "string"},
+         {   "name": "creationTime", "type": "long"},
+         {   "name": "verified", "type": "boolean"}
+     ]
+}

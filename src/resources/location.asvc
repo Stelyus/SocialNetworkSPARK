@@ -1,0 +1,12 @@
+{
+    "namespace": "kakfa-avro.location",
+     "type": "record",
+     "name": "location",
+     "fields":[
+         {   "name": "id", "type": "string"},
+         {   "name": "creationTime",  "type": "long"},
+         {   "name": "author", "type": "string"},
+         {   "name": "city", "type": "string"},
+         {   "name": "country", "type": "string"}
+     ]
+}

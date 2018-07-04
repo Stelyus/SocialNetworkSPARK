@@ -1,0 +1,11 @@
+{
+    "namespace": "kakfa-avro.like",
+     "type": "record",
+     "name": "like",
+     "fields":[
+         {   "name": "id", "type": "string"},
+         {   "name": "author", "type": "string"},
+         {   "name": "creationTime",  "type": "long"},
+         {   "name": "postId", "type": "string"}
+     ]
+}

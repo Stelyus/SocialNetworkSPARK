@@ -22,7 +22,7 @@ case class Message(id: Id[Message], updatedOn: Instant, receiver: Id[User], auth
 }
 object Message {
   implicit val schema: Schema = new Parser().parse(Source.fromFile("src/resources/message.avsc").mkString)
-  def serializeMessage(msg: Message): Array[Byte] = {
+  def serialize(msg: Message): Array[Byte] = {
     // Create avro generic record object
     val genericMessage: GenericRecord = new GenericData.Record(schema)
     //Put data in that generic record
@@ -42,7 +42,7 @@ object Message {
     out.toByteArray()
   }
 
-  def deserializeMessage(raw: Array[Byte]): Message = {
+  def deserialize(raw: Array[Byte]): Message = {
     val reader: DatumReader[GenericRecord] = new SpecificDatumReader[GenericRecord](schema)
     val decoder: Decoder = DecoderFactory.get().binaryDecoder(raw, null)
     val msgData: GenericRecord = reader.read(null, decoder)
