@@ -12,9 +12,9 @@ import org.apache.avro.specific.{SpecificDatumReader, SpecificDatumWriter}
 import scala.io.Source
 
 case class Message(id: Id[Message], updatedOn: Instant, receiver: Id[User], author: Id[User], text: String, deleted: Boolean) {
-  override def toString(): String = {
+  override def toString: String = {
     "id: " + id.value + System.lineSeparator() +
-      "updatedOn" + updatedOn.getEpochSecond() + System.lineSeparator() +
+      "updatedOn" + updatedOn.getEpochSecond + System.lineSeparator() +
       "author: " + author.value + System.lineSeparator() +
       "receiver: " + receiver.value + System.lineSeparator() + 
       "text: " + text + System.lineSeparator()
