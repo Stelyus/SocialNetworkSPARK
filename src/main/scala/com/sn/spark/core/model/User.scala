@@ -8,6 +8,7 @@ import org.apache.avro.Schema.Parser
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.avro.io._
 import org.apache.avro.specific.{SpecificDatumReader, SpecificDatumWriter}
+import org.joda.time.DateTime
 
 import scala.io.Source
 

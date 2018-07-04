@@ -11,12 +11,12 @@ import org.apache.avro.specific.{SpecificDatumReader, SpecificDatumWriter}
 
 import scala.io.Source
 
-case class Message(id: Id[Message], updatedOn: Instant, receiver: Id[User], author: Id[User], text: String, deleted: Boolean) {
+case class Message(id: Id[Message], creationTime: Instant, receiver: Id[User], author: Id[User], text: String, deleted: Boolean) {
   override def toString: String = {
     "id: " + id.value + System.lineSeparator() +
-      "updatedOn" + updatedOn.getEpochSecond + System.lineSeparator() +
+      "creationTime" + creationTime.getEpochSecond + System.lineSeparator() +
       "author: " + author.value + System.lineSeparator() +
-      "receiver: " + receiver.value + System.lineSeparator() + 
+      "receiver: " + receiver.value + System.lineSeparator() +
       "text: " + text + System.lineSeparator()
   }
 }
@@ -27,7 +27,7 @@ object Message {
     val genericMessage: GenericRecord = new GenericData.Record(schema)
     //Put data in that generic record
     genericMessage.put("id", msg.id.value)
-    genericMessage.put("updatedOn" , msg.updatedOn.toEpochMilli)
+    genericMessage.put("creationTime" , msg.creationTime.toEpochMilli)
     genericMessage.put("author", msg.author.value)
     genericMessage.put("receiver", msg.receiver.value)
     genericMessage.put("text", msg.text)
@@ -46,7 +46,7 @@ object Message {
     val reader: DatumReader[GenericRecord] = new SpecificDatumReader[GenericRecord](schema)
     val decoder: Decoder = DecoderFactory.get().binaryDecoder(raw, null)
     val msgData: GenericRecord = reader.read(null, decoder)
-    Message(Id[Message](msgData.get("id").toString), Instant.ofEpochMilli(msgData.get("updatedOn").toString.toLong),
+    Message(Id[Message](msgData.get("id").toString), Instant.ofEpochMilli(msgData.get("creationTime").toString.toLong),
       Id[User](msgData.get("receiver").toString), Id[User](msgData.get("author").toString),
       msgData.get("text").toString, msgData.get("deleted").toString.toBoolean)
   }

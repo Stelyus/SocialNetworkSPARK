@@ -13,10 +13,10 @@ import scala.io.Source
 
 case class Id[Resource](value: String) extends AnyVal
 
-case class Post(id: Id[Post], updatedOn: Instant, author: Id[User], text: String, deleted: Boolean) {
+case class Post(id: Id[Post], creationTime: Instant, author: Id[User], text: String) {
   override def toString(): String = {
     "id: " + id.value + System.lineSeparator() +
-    "updatedOn: " + updatedOn.getEpochSecond() + System.lineSeparator() +
+    "creationTime: " + creationTime.getEpochSecond() + System.lineSeparator() +
     "author: " + author.value + System.lineSeparator() +
     "text: " + text + System.lineSeparator()
   }
@@ -30,10 +30,9 @@ object Post {
     //Put data in that generic record
 
     genericPost.put("id", post.id.value)
-    genericPost.put("updatedOn" , post.updatedOn.toEpochMilli)
+    genericPost.put("creationTime" , post.creationTime.toEpochMilli)
     genericPost.put("author", post.author.value)
     genericPost.put("text", post.text)
-    genericPost.put("deleted", post.deleted)
     // Serialize generic record into byte array
     val writer = new SpecificDatumWriter[GenericRecord](schema)
     val out = new ByteArrayOutputStream()
@@ -49,7 +48,7 @@ object Post {
     val decoder: Decoder = DecoderFactory.get().binaryDecoder(raw, null)
     val postData: GenericRecord = reader.read(null, decoder)
 
-    Post(Id[Post](postData.get("id").toString), Instant.ofEpochMilli(postData.get("updatedOn").toString.toLong), Id[User](postData.get("author").toString),
-      postData.get("text").toString, postData.get("deleted").toString.toBoolean)
+    Post(Id[Post](postData.get("id").toString), Instant.ofEpochMilli(postData.get("creationTime").toString.toLong), Id[User](postData.get("author").toString),
+      postData.get("text").toString)
   }
 }

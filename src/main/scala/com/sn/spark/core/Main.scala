@@ -1,21 +1,28 @@
 import java.time.Instant
 
 import com.sn.spark.core.model._
+import com.datastax.spark.connector._
+import com.sn.spark.core.model.{Id, Message, Post, User}
 import org.apache.kafka.clients.producer.KafkaProducer
 import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProducer, PostProducer}
 import com.sn.spark.core.consumer.{LikeConsumer, LocationConsumer, MessageConsumer, PostConsumer}
 import org.apache.log4j.BasicConfigurator
+import org.apache.spark.{SparkConf, SparkContext}
+import com.datastax.driver.core.utils.UUIDs
+import org.joda.time.DateTime
 
 import scala.util.Random
 
 object Main extends App {
   override def main(args: Array[String]): Unit = {
-    BasicConfigurator.configure()
+  //  BasicConfigurator.configure()
 
 //    sendPost()
 //    sendMessage()
 //    sendLike()
 //    sendLocation()
+//    val usr = new User( Id[User](UUIDs.timeBased().toString),"jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
+//    CassandraTest.sendProfile(usr)
   }
 
 
@@ -104,8 +111,7 @@ object Main extends App {
           Id[Post]("post"+i),
           Instant.now(),
           Id[User](arrayUser(r.nextInt(usersLength))),
-          arrayText(r.nextInt(textsLength)),
-          deleted = false
+          arrayText(r.nextInt(textsLength))
         ),
         postProducer
       )

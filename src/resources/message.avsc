@@ -4,7 +4,7 @@
      "name": "message",
      "fields":[
          {   "name": "id", "type": "string"},
-         {   "name": "updatedOn",  "type": "long"},
+         {   "name": "creationTime",  "type": "long"},
          {   "name": "receiver", "type": "string"},
          {   "name": "author", "type": "string"},
          {   "name": "text", "type": "string"},

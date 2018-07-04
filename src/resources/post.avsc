@@ -4,7 +4,7 @@
      "name": "post",
      "fields":[
          {   "name": "id", "type": "string"},
-         {   "name": "updatedOn",  "type": "long"},
+         {   "name": "creationTime",  "type": "long"},
          {   "name": "author", "type": "string"},
          {   "name": "text", "type": "string"},
          {   "name": "deleted", "type": "boolean"}
