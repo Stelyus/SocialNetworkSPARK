@@ -21,7 +21,6 @@ object Cassandra {
     val collection = sc.parallelize(
       Seq(
         (
-          user.id.value,
           Date.from(user.creationTime),
           user.firstName,
           user.lastName,
@@ -33,7 +32,6 @@ object Cassandra {
 
     collection.saveToCassandra("spark", "user",
       SomeColumns(
-        "id",
         "creation_time",
         "firstname",
         "lastname",

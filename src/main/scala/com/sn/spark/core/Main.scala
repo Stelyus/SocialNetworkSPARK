@@ -21,8 +21,8 @@ object Main extends App {
 //    sendMessage()
 //    sendLike()
 //    sendLocation()
-//    val usr = new User( Id[User](UUIDs.timeBased().toString),"jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
-//    CassandraTest.sendProfile(usr)
+    val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
+    Cassandra.sendProfile(usr)
   }
 
 

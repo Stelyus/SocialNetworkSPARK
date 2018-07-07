@@ -12,10 +12,9 @@ import org.joda.time.DateTime
 
 import scala.io.Source
 
-case class User(id: Id[User], firstName: String, lastName: String,
+case class User(firstName: String, lastName: String,
                 email: String, nickname: String, creationTime: Instant, verified: Boolean = true) {
   override def toString(): String = {
-    "id: " + id.value + System.lineSeparator() +
     "fistName: " + firstName + System.lineSeparator() +
     "lastName: " + firstName + System.lineSeparator() +
     "email: " + firstName + System.lineSeparator() +
@@ -32,7 +31,6 @@ object User {
     val genericPost: GenericRecord = new GenericData.Record(schema)
     //Put data in that generic record
 
-    genericPost.put("id", user.id.value)
     genericPost.put("firstName", user.firstName)
     genericPost.put("lastName", user.lastName)
     genericPost.put("email" , user.email)
@@ -55,7 +53,7 @@ object User {
     val decoder: Decoder = DecoderFactory.get().binaryDecoder(raw, null)
     val userData: GenericRecord = reader.read(null, decoder)
 
-    User(Id[User](userData.get("id").toString), userData.get("firstName").toString,
+    User(userData.get("firstName").toString,
       userData.get("lastName").toString, userData.get("email").toString, userData.get("nickname").toString,
       Instant.ofEpochMilli(userData.get("creationTime").toString.toLong), userData.get("verified").toString.toBoolean)
   }
