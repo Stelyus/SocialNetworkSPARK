@@ -1,6 +1,12 @@
 import java.time.Instant
 
 import com.sn.spark.Topic
+
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.Http.ServerBinding
+import akka.http.scaladsl.server.Directives
+import akka.stream.ActorMaterializer
 import com.sn.spark.core.model._
 import com.sn.spark.core.model.{Id, Message, Post, User}
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -8,10 +14,22 @@ import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProduc
 import com.sn.spark.core.consumer.{LikeConsumer, LocationConsumer, MessageConsumer, PostConsumer}
 import org.apache.kafka.clients.consumer.{ConsumerRecord, ConsumerRecords, KafkaConsumer}
 import scala.collection.JavaConversions._
+import org.apache.log4j.BasicConfigurator
+import org.apache.spark.{SparkConf, SparkContext}
+import com.datastax.driver.core.utils.UUIDs
+import com.sn.spark.core.api.routes.PostRoutes
+import com.sn.spark.core.api.utils.utils.JsonSupport
+import org.joda.time.DateTime
+
+import scala.concurrent.Future
 import scala.util.Random
 
-object Main extends App {
-  override def main(args: Array[String]): Unit = {
+object Main extends Directives with JsonSupport {
+  implicit val system = ActorSystem("my-system")
+  implicit val executor = system.dispatcher
+  implicit val materializer = ActorMaterializer()
+
+  def main(args: Array[String]): Unit = {
   //  BasicConfigurator.configure()
 
 //    sendPost()
@@ -19,6 +37,7 @@ object Main extends App {
 //    sendLike()
 //    sendLocation()
 
+    // FIND A WAY TO GET THE RIGHT PATH FOR HOST COMPUTER
     val path = "/Users/berthierhadrien/Epita/spark/SocialNetworkSPARK/testCassandra"
     val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
 
@@ -27,8 +46,25 @@ object Main extends App {
 
     Cassandra.readHDFS(path).collect().foreach(println)
 
+    /*val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
+    Cassandra.sendProfile(usr)*/
+
+    //val bindingFuture: Future[ServerBinding] =
+
+    Http().bindAndHandle(PostRoutes.getRoute(), "localhost", 8080)
+
+    println(s"Server online at http://localhost:8080/")
+
   }
 
+  def exitProgram(bindingFuture: Future[ServerBinding]): Unit = {
+    bindingFuture.flatMap(_.unbind()) // trigger unbinding from the port
+      .onComplete(_ => {
+      system.terminate();
+      sys.exit(0)
+    })
+    println("Exit")
+  }
 
   def sendMessage(): Unit = {
     val messageConsumer = MessageConsumer.createConsumer()
