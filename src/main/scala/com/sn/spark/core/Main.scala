@@ -1,15 +1,13 @@
 import java.time.Instant
 
+import com.sn.spark.Topic
 import com.sn.spark.core.model._
-import com.datastax.spark.connector._
 import com.sn.spark.core.model.{Id, Message, Post, User}
 import org.apache.kafka.clients.producer.KafkaProducer
 import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProducer, PostProducer}
 import com.sn.spark.core.consumer.{LikeConsumer, LocationConsumer, MessageConsumer, PostConsumer}
-import org.apache.log4j.BasicConfigurator
-import org.apache.spark.{SparkConf, SparkContext}
-import com.datastax.driver.core.utils.UUIDs
-import org.joda.time.DateTime
+import org.apache.kafka.clients.consumer.{ConsumerRecord, ConsumerRecords, KafkaConsumer}
+import scala.collection.JavaConversions._
 
 import scala.util.Random
 
@@ -21,17 +19,28 @@ object Main extends App {
 //    sendMessage()
 //    sendLike()
 //    sendLocation()
-    val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
-    Cassandra.sendProfile(usr)
+//    val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
+//    Cassandra.sendProfile(usr)
   }
 
 
   def sendMessage(): Unit = {
     val messageConsumer = MessageConsumer.createConsumer()
-    val messageTopic: String = "send-message-to-cassandra"
+    val messageTopic: String = Topic.MessageToCassandra
 
 
-    MessageConsumer.read(messageTopic, messageConsumer)
+    MessageConsumer.read(messageTopic, messageConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = messageConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val msg: Message = Message.deserialize(record.value())
+            System.out.println("msg: " + msg.toString())
+          }
+        }
+      }
+    })
 
 
     val messageProducer: KafkaProducer[String, Array[Byte]] = MessageProducer.createProducer()
@@ -79,9 +88,21 @@ object Main extends App {
 
   def sendPost(): Unit = {
     val postConsumer = PostConsumer.createConsumer()
-    val postTopic: String = "send-posts-to-cassandra"
+    val postTopic: String = Topic.PostsToCassandra
 
-    PostConsumer.read(postTopic, postConsumer)
+    PostConsumer.read(postTopic, postConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = postConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val msg: Message = Message.deserialize(record.value())
+            System.out.println("msg: " + msg.toString())
+          }
+        }
+      }
+    })
+
     val postProducer: KafkaProducer[String, Array[Byte]] = PostProducer.createProducer()
     var i: Int = 0
     // Send 100 Post on Topic posts-topic
@@ -126,9 +147,21 @@ object Main extends App {
 
   def sendLike(): Unit = {
     val likeConsumer = LikeConsumer.createConsumer()
-    val likesTopic: String = "send-like-to-cassandra"
+    val likesTopic: String = Topic.LikeToCassandra
 
-    LikeConsumer.read(likesTopic, likeConsumer)
+    LikeConsumer.read(likesTopic, likeConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = likeConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val msg: Message = Message.deserialize(record.value())
+            System.out.println("msg: " + msg.toString())
+          }
+        }
+      }
+    })
+
     val likeProducer: KafkaProducer[String, Array[Byte]] = LikeProducer.createProducer()
     var i: Int = 0
     // Send 100 Post on Topic posts-topic
@@ -161,9 +194,21 @@ object Main extends App {
 
   def sendLocation(): Unit = {
     val locConsumer = LocationConsumer.createConsumer()
-    val locTopic: String = "send-location-to-cassandra"
+    val locTopic: String = Topic.LocationToCassandra
 
-    LocationConsumer.read(locTopic, locConsumer)
+    LocationConsumer.read(locTopic, locConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = locConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val msg: Message = Message.deserialize(record.value())
+            System.out.println("msg: " + msg.toString())
+          }
+        }
+      }
+    })
+
     val locProducer: KafkaProducer[String, Array[Byte]] = LocationProducer.createProducer()
     var i: Int = 0
     // Send 100 Post on Topic posts-topic

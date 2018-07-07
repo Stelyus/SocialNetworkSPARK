@@ -4,6 +4,7 @@ import java.util.Date
 
 import com.datastax.spark.connector._
 import com.datastax.driver.core.utils.UUIDs
+import com.sn.spark.core.consumer._
 import org.apache.spark.sql.cassandra._
 import org.apache.spark._
 import com.sn.spark.core.model._
@@ -16,6 +17,12 @@ object Cassandra {
     .set("spark.cassandra.connection.host", "localhost")
 
   val sc = new SparkContext(conf)
+
+  val locationConsumer = LocationConsumer.createConsumer()
+  val likeConsumer = LikeConsumer.createConsumer()
+  val postConsumer = PostConsumer.createConsumer()
+  val messageConsumer = MessageConsumer.createConsumer()
+  val userConsumer = UserConsumer.createConsumer()
 
   def sendProfile(user: User) : Unit ={
     val collection = sc.parallelize(

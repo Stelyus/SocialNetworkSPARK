@@ -1,6 +1,7 @@
 package com.sn.spark.core.consumer
 
-import java.util.Properties
+import java.util.concurrent.Executors
+import java.util.{Collections, Properties}
 
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -19,5 +20,8 @@ trait Consumer {
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     new KafkaConsumer[String, Array[Byte]](props)
   }
-  def read(topic: String, consumer: KafkaConsumer[String, Array[Byte]]): Unit
+  def read(topic: String, consumer: KafkaConsumer[String, Array[Byte]], runnable: Runnable): Unit = {
+    consumer.subscribe(Collections.singletonList(topic))
+    Executors.newSingleThreadExecutor.execute(runnable)
+  }
 }
