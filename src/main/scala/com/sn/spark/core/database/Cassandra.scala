@@ -3,12 +3,11 @@
 import java.util.Date
 
 import com.datastax.spark.connector._
-import com.datastax.driver.core.utils.UUIDs
 import com.sn.spark.core.consumer._
-import org.apache.spark.sql.cassandra._
 import org.apache.spark._
 import com.sn.spark.core.model._
-import org.joda.time.DateTime
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.spark.rdd.RDD
 
 object Cassandra {
   val conf = new SparkConf(true)
@@ -23,6 +22,21 @@ object Cassandra {
   val postConsumer = PostConsumer.createConsumer()
   val messageConsumer = MessageConsumer.createConsumer()
   val userConsumer = UserConsumer.createConsumer()
+
+  def saveToFile(path: String, base: String, table: String): Unit ={
+    val fs=FileSystem.get(Cassandra.sc.hadoopConfiguration)
+    if(fs.exists(new Path(path)))
+      fs.delete(new Path(path),true)
+
+    val rdd = sc.cassandraTable(base, table)
+    rdd.saveAsTextFile(path)
+  }
+
+  def readHDFS(path: String): RDD[String] = {
+    val lines = sc.textFile(path)
+//    lines.collect().foreach(println)
+    lines
+  }
 
   def sendProfile(user: User) : Unit ={
     val collection = sc.parallelize(

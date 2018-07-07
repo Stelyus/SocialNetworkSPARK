@@ -8,7 +8,6 @@ import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProduc
 import com.sn.spark.core.consumer.{LikeConsumer, LocationConsumer, MessageConsumer, PostConsumer}
 import org.apache.kafka.clients.consumer.{ConsumerRecord, ConsumerRecords, KafkaConsumer}
 import scala.collection.JavaConversions._
-
 import scala.util.Random
 
 object Main extends App {
@@ -19,8 +18,15 @@ object Main extends App {
 //    sendMessage()
 //    sendLike()
 //    sendLocation()
-//    val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
+
+    val path = "/Users/berthierhadrien/Epita/spark/SocialNetworkSPARK/testCassandra"
+    val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
+
 //    Cassandra.sendProfile(usr)
+    //Cassandra.saveToFile(path, "spark", "user")
+
+    Cassandra.readHDFS(path).collect().foreach(println)
+
   }
 
 
