@@ -10,18 +10,14 @@ import akka.stream.ActorMaterializer
 import com.sn.spark.core.model._
 import com.sn.spark.core.model.{Id, Message, Post, User}
 import org.apache.kafka.clients.producer.KafkaProducer
+
 import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProducer, PostProducer}
-import com.sn.spark.core.consumer.{LikeConsumer, LocationConsumer, MessageConsumer, PostConsumer}
-import org.apache.kafka.clients.consumer.{ConsumerRecord, ConsumerRecords, KafkaConsumer}
-import scala.collection.JavaConversions._
-import org.apache.log4j.BasicConfigurator
-import org.apache.spark.{SparkConf, SparkContext}
-import com.datastax.driver.core.utils.UUIDs
 import com.sn.spark.core.api.routes.PostRoutes
 import com.sn.spark.core.api.utils.utils.JsonSupport
-import org.joda.time.DateTime
 
 import scala.concurrent.Future
+
+import com.sn.spark.core.producer._
 import scala.util.Random
 
 object Main extends Directives with JsonSupport {
@@ -41,6 +37,9 @@ object Main extends Directives with JsonSupport {
     val path = "/Users/berthierhadrien/Epita/spark/SocialNetworkSPARK/testCassandra"
     val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
 
+    Cassandra.init()
+//    sendUser()
+//    val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
 //    Cassandra.sendProfile(usr)
     //Cassandra.saveToFile(path, "spark", "user")
 
@@ -67,24 +66,8 @@ object Main extends Directives with JsonSupport {
   }
 
   def sendMessage(): Unit = {
-    val messageConsumer = MessageConsumer.createConsumer()
+
     val messageTopic: String = Topic.MessageToCassandra
-
-
-    MessageConsumer.read(messageTopic, messageConsumer, new Runnable {
-      override def run(): Unit = {
-        while (true) {
-          val records: ConsumerRecords[String, Array[Byte]] = messageConsumer.poll(1000)
-          for (record <- records) {
-            System.out.println("key: " + record.key())
-            val msg: Message = Message.deserialize(record.value())
-            System.out.println("msg: " + msg.toString())
-          }
-        }
-      }
-    })
-
-
     val messageProducer: KafkaProducer[String, Array[Byte]] = MessageProducer.createProducer()
     var i: Int = 0
     // Send 100 Post on Topic posts-topic
@@ -129,21 +112,7 @@ object Main extends Directives with JsonSupport {
   }
 
   def sendPost(): Unit = {
-    val postConsumer = PostConsumer.createConsumer()
     val postTopic: String = Topic.PostsToCassandra
-
-    PostConsumer.read(postTopic, postConsumer, new Runnable {
-      override def run(): Unit = {
-        while (true) {
-          val records: ConsumerRecords[String, Array[Byte]] = postConsumer.poll(1000)
-          for (record <- records) {
-            System.out.println("key: " + record.key())
-            val msg: Message = Message.deserialize(record.value())
-            System.out.println("msg: " + msg.toString())
-          }
-        }
-      }
-    })
 
     val postProducer: KafkaProducer[String, Array[Byte]] = PostProducer.createProducer()
     var i: Int = 0
@@ -188,21 +157,7 @@ object Main extends Directives with JsonSupport {
   }
 
   def sendLike(): Unit = {
-    val likeConsumer = LikeConsumer.createConsumer()
     val likesTopic: String = Topic.LikeToCassandra
-
-    LikeConsumer.read(likesTopic, likeConsumer, new Runnable {
-      override def run(): Unit = {
-        while (true) {
-          val records: ConsumerRecords[String, Array[Byte]] = likeConsumer.poll(1000)
-          for (record <- records) {
-            System.out.println("key: " + record.key())
-            val msg: Message = Message.deserialize(record.value())
-            System.out.println("msg: " + msg.toString())
-          }
-        }
-      }
-    })
 
     val likeProducer: KafkaProducer[String, Array[Byte]] = LikeProducer.createProducer()
     var i: Int = 0
@@ -235,21 +190,7 @@ object Main extends Directives with JsonSupport {
   }
 
   def sendLocation(): Unit = {
-    val locConsumer = LocationConsumer.createConsumer()
     val locTopic: String = Topic.LocationToCassandra
-
-    LocationConsumer.read(locTopic, locConsumer, new Runnable {
-      override def run(): Unit = {
-        while (true) {
-          val records: ConsumerRecords[String, Array[Byte]] = locConsumer.poll(1000)
-          for (record <- records) {
-            System.out.println("key: " + record.key())
-            val msg: Message = Message.deserialize(record.value())
-            System.out.println("msg: " + msg.toString())
-          }
-        }
-      }
-    })
 
     val locProducer: KafkaProducer[String, Array[Byte]] = LocationProducer.createProducer()
     var i: Int = 0
@@ -303,5 +244,34 @@ object Main extends Directives with JsonSupport {
 
     locProducer.close()
   }
+
+  def sendUser(): Unit = {
+    val userTopic: String = Topic.UserToCassandra
+
+    val userProducer: KafkaProducer[String, Array[Byte]] = UserProducer.createProducer()
+    var i: Int = 0
+    // Send 100 Post on Topic posts-topic
+
+
+    val arrayUser: List[String] = List("Gabriel", "Adam", "Raphael", "Paul", "Louis", "Arthur", "Alexandre", "Victor",
+      "Jules", "Mohamed", "Lucas", "Joseph", "Antoine", "Gaspard", "Maxime")
+
+    for (user <- arrayUser) {
+      UserProducer.send[User](
+        userTopic,
+        User(
+          user,
+          user,
+          user + "@gmail.com",
+          user,
+          Instant.now(),
+          false
+        ),
+        userProducer
+      )
+    }
+    userProducer.close()
+  }
+
 
 }

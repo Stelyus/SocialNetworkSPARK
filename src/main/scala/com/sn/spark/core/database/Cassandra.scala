@@ -1,15 +1,18 @@
-
-
 import java.util.Date
 
 import com.datastax.spark.connector._
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.spark.rdd.RDD
+import com.sn.spark.Topic
 import com.sn.spark.core.consumer._
 import org.apache.spark._
 import com.sn.spark.core.model._
-import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.rdd.RDD
+import org.apache.kafka.clients.consumer.ConsumerRecords
+
+import scala.collection.JavaConversions._
 
 object Cassandra {
+
   val conf = new SparkConf(true)
     .setAppName("Cassandra")
     .setMaster("local[*]")
@@ -17,11 +20,79 @@ object Cassandra {
 
   val sc = new SparkContext(conf)
 
-  val locationConsumer = LocationConsumer.createConsumer()
-  val likeConsumer = LikeConsumer.createConsumer()
-  val postConsumer = PostConsumer.createConsumer()
-  val messageConsumer = MessageConsumer.createConsumer()
-  val userConsumer = UserConsumer.createConsumer()
+  def init(): Unit = {
+    val locationConsumer = LocationConsumer.createConsumer()
+    LocationConsumer.read(Topic.LocationToCassandra, locationConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = locationConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val loc: Location = Location.deserialize(record.value())
+            sendLocation(loc)
+          }
+        }
+      }
+    })
+
+
+    val likeConsumer = LikeConsumer.createConsumer()
+    LikeConsumer.read(Topic.LikeToCassandra, likeConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = likeConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val lk: Like = Like.deserialize(record.value())
+            sendLike(lk)
+          }
+        }
+      }
+    })
+
+    val postConsumer = PostConsumer.createConsumer()
+    PostConsumer.read(Topic.PostsToCassandra, postConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = likeConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val post: Post = Post.deserialize(record.value())
+            sendPost(post)
+          }
+        }
+      }
+    })
+
+    val messageConsumer = MessageConsumer.createConsumer()
+    MessageConsumer.read(Topic.MessageToCassandra, messageConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = messageConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val msg: Message = Message.deserialize(record.value())
+            sendMessage(msg)
+          }
+        }
+      }
+    })
+
+    val userConsumer = UserConsumer.createConsumer()
+    UserConsumer.read(Topic.UserToCassandra, userConsumer, new Runnable {
+      override def run(): Unit = {
+        while (true) {
+          val records: ConsumerRecords[String, Array[Byte]] = userConsumer.poll(1000)
+          for (record <- records) {
+            System.out.println("key: " + record.key())
+            val usr: User = User.deserialize(record.value())
+            System.out.println(usr.toString())
+            //          sendProfile(usr)
+          }
+        }
+      }
+    })
+  }
 
   def saveToFile(path: String, base: String, table: String): Unit ={
     val fs=FileSystem.get(Cassandra.sc.hadoopConfiguration)
