@@ -6,7 +6,6 @@
          {   "name": "id", "type": "string"},
          {   "name": "creationTime",  "type": "long"},
          {   "name": "author", "type": "string"},
-         {   "name": "text", "type": "string"},
-         {   "name": "deleted", "type": "boolean"}
+         {   "name": "text", "type": "string"}
      ]
 }

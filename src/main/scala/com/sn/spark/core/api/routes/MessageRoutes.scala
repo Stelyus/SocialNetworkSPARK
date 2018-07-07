@@ -1,20 +1,20 @@
 package com.sn.spark.core.api.routes
+
 import java.time.Instant
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives
-import com.sn.spark.core.api.model.PostRequest
+import com.sn.spark.core.api.model.MessageRequest
 import com.sn.spark.core.api.utils.JsonSupport
-import com.sn.spark.core.model.{Id, Post, User}
-import com.sn.spark.core.producer.PostProducer
+import com.sn.spark.core.model.{Id, Message, User}
+import com.sn.spark.core.producer.MessageProducer
 import org.apache.kafka.clients.producer.KafkaProducer
 
 
-// Default ID POST == 1
-object PostRoutes extends Directives with JsonSupport {
+object MessageRoutes extends Directives with JsonSupport {
   def getRoute(producer: KafkaProducer[String, Array[Byte]], str: String) = {
     pathPrefix("api") {
-      pathPrefix("post") {
+      pathPrefix("message") {
         path("id" / IntNumber) { id =>
           get {
             complete {
@@ -24,12 +24,13 @@ object PostRoutes extends Directives with JsonSupport {
         }
       } ~ {
         post {
-          path("post") {
-            entity(as[PostRequest]) { postRequest: PostRequest =>
-              PostProducer.send[Post](str,
-                Post(Id[Post]("1"), Instant.now() , Id[User](postRequest.author), postRequest.text),
+          path("message") {
+            entity(as[MessageRequest]) { msgRequest: MessageRequest =>
+              MessageProducer.send[Message](str,
+                Message(Id[Message]("1"), Instant.now(), Id[User](msgRequest.receiver),
+                  Id[User](msgRequest.author), msgRequest.text),
                 producer)
-              System.out.println(postRequest.toString)
+              System.out.println(msgRequest.toString)
               complete(StatusCodes.Created)
             }
           }
@@ -37,4 +38,5 @@ object PostRoutes extends Directives with JsonSupport {
       }
     }
   }
+
 }

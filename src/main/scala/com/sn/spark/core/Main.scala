@@ -1,7 +1,6 @@
 import java.time.Instant
 
 import com.sn.spark.Topic
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
@@ -13,7 +12,8 @@ import org.apache.kafka.clients.producer.KafkaProducer
 
 import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProducer, PostProducer}
 import com.sn.spark.core.api.routes.PostRoutes
-import com.sn.spark.core.api.utils.utils.JsonSupport
+import com.sn.spark.core.api.routes._
+import com.sn.spark.core.api.utils.JsonSupport
 
 import scala.concurrent.Future
 
@@ -43,14 +43,29 @@ object Main extends Directives with JsonSupport {
 //    Cassandra.sendProfile(usr)
     //Cassandra.saveToFile(path, "spark", "user")
 
-    Cassandra.readHDFS(path).collect().foreach(println)
+    // Cassandra.readHDFS(path).collect().foreach(println)
 
     /*val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
     Cassandra.sendProfile(usr)*/
 
-    //val bindingFuture: Future[ServerBinding] =
 
-    Http().bindAndHandle(PostRoutes.getRoute(), "localhost", 8080)
+    // Init Producer for APIs Routes
+    val postProducer = PostProducer.createProducer()
+    val messageProducer = PostProducer.createProducer()
+    val likeProducer = PostProducer.createProducer()
+    val locationProducer = PostProducer.createProducer()
+    val userProducer = PostProducer.createProducer()
+    val LocationToCassandra = "send-location-to-cassandra"
+    val MessageToCassandra = "send-message-to-cassandra"
+    val PostsToCassandra = "send-posts-to-cassandra"
+    val LikeToCassandra = "send-like-to-cassandra"
+    val UserToCassandra = "send-user-to-cassandra"
+
+    Http().bindAndHandle(PostRoutes.getRoute(postProducer, PostsToCassandra) ~
+      MessageRoutes.getRoute(messageProducer, MessageToCassandra) ~
+      LikeRoutes.getRoute(likeProducer, LikeToCassandra) ~
+      LocationRoutes.getRoute(locationProducer, LocationToCassandra) ~
+      UserRoutes.getRoute(userProducer,UserToCassandra ), "localhost", 8080)
 
     println(s"Server online at http://localhost:8080/")
 

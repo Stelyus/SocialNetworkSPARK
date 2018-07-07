@@ -11,7 +11,7 @@ import org.apache.avro.specific.{SpecificDatumReader, SpecificDatumWriter}
 
 import scala.io.Source
 
-case class Id[Resource](value: String) extends AnyVal
+final case class Id[Resource](value: String) extends AnyVal
 
 case class Post(id: Id[Post], creationTime: Instant, author: Id[User], text: String) {
   override def toString(): String = {
@@ -21,7 +21,6 @@ case class Post(id: Id[Post], creationTime: Instant, author: Id[User], text: Str
     "text: " + text + System.lineSeparator()
   }
 }
-
 object Post {
   implicit val schema: Schema = new Parser().parse(Source.fromFile("src/resources/post.avsc").mkString)
   def serialize(post: Post): Array[Byte] = {

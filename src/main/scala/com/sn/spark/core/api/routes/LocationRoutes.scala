@@ -1,20 +1,19 @@
 package com.sn.spark.core.api.routes
+
 import java.time.Instant
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives
-import com.sn.spark.core.api.model.PostRequest
+import com.sn.spark.core.api.model.LocationRequest
 import com.sn.spark.core.api.utils.JsonSupport
-import com.sn.spark.core.model.{Id, Post, User}
-import com.sn.spark.core.producer.PostProducer
+import com.sn.spark.core.model.{Id, Location, User}
+import com.sn.spark.core.producer.LocationProducer
 import org.apache.kafka.clients.producer.KafkaProducer
 
-
-// Default ID POST == 1
-object PostRoutes extends Directives with JsonSupport {
+object LocationRoutes extends Directives with JsonSupport {
   def getRoute(producer: KafkaProducer[String, Array[Byte]], str: String) = {
     pathPrefix("api") {
-      pathPrefix("post") {
+      pathPrefix("location") {
         path("id" / IntNumber) { id =>
           get {
             complete {
@@ -24,12 +23,13 @@ object PostRoutes extends Directives with JsonSupport {
         }
       } ~ {
         post {
-          path("post") {
-            entity(as[PostRequest]) { postRequest: PostRequest =>
-              PostProducer.send[Post](str,
-                Post(Id[Post]("1"), Instant.now() , Id[User](postRequest.author), postRequest.text),
+          path("location") {
+            entity(as[LocationRequest]) { locationRequest: LocationRequest =>
+              LocationProducer.send[Location](str,
+                Location(Id[Location]("1"), Instant.now(), Id[User](locationRequest.author),
+                  locationRequest.city, locationRequest.country),
                 producer)
-              System.out.println(postRequest.toString)
+              System.out.println(locationRequest.toString)
               complete(StatusCodes.Created)
             }
           }
