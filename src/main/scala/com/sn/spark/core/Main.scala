@@ -28,7 +28,7 @@ object Main extends App {
 
   def sendMessage(): Unit = {
     val messageConsumer = MessageConsumer.createConsumer()
-    val messageTopic: String = "messages-topic"
+    val messageTopic: String = "send-message-to-cassandra"
 
 
     MessageConsumer.read(messageTopic, messageConsumer)
@@ -79,7 +79,7 @@ object Main extends App {
 
   def sendPost(): Unit = {
     val postConsumer = PostConsumer.createConsumer()
-    val postTopic: String = "posts-topic"
+    val postTopic: String = "send-posts-to-cassandra"
 
     PostConsumer.read(postTopic, postConsumer)
     val postProducer: KafkaProducer[String, Array[Byte]] = PostProducer.createProducer()
@@ -126,7 +126,7 @@ object Main extends App {
 
   def sendLike(): Unit = {
     val likeConsumer = LikeConsumer.createConsumer()
-    val likesTopic: String = "like-topic"
+    val likesTopic: String = "send-like-to-cassandra"
 
     LikeConsumer.read(likesTopic, likeConsumer)
     val likeProducer: KafkaProducer[String, Array[Byte]] = LikeProducer.createProducer()
@@ -161,7 +161,7 @@ object Main extends App {
 
   def sendLocation(): Unit = {
     val locConsumer = LocationConsumer.createConsumer()
-    val locTopic: String = "location-topic"
+    val locTopic: String = "send-location-to-cassandra"
 
     LocationConsumer.read(locTopic, locConsumer)
     val locProducer: KafkaProducer[String, Array[Byte]] = LocationProducer.createProducer()
