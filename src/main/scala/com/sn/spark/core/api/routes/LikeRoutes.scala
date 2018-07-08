@@ -14,7 +14,6 @@ import com.sn.spark.core.producer.LikeProducer
 import org.apache.kafka.clients.producer.KafkaProducer
 
 
-// Default ID LIKE == 1
 object LikeRoutes extends Directives with JsonSupport {
   def getRoute(producer: KafkaProducer[String, Array[Byte]], str: String) = {
     pathPrefix("api") {

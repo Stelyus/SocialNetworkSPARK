@@ -13,7 +13,6 @@ import com.sn.spark.core.producer.PostProducer
 import org.apache.kafka.clients.producer.KafkaProducer
 
 
-// Default ID POST == 1
 object PostRoutes extends Directives with JsonSupport {
   def getRoute(producer: KafkaProducer[String, Array[Byte]], str: String) = {
     pathPrefix("api") {

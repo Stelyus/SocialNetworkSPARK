@@ -6,6 +6,7 @@ import com.sn.spark.core.api.model.Response.LikeResponseObject.LikeResponse
 import com.sn.spark.core.api.model.Response.LocationResponseObject.LocationResponse
 import com.sn.spark.core.api.model.Response.MessageResponseObject.MessageResponse
 import com.sn.spark.core.api.model.Response.PostResponseObject.PostResponse
+import com.sn.spark.core.api.model.Response.SearchResponse
 import com.sn.spark.core.api.model.Response.UserResponseObject.UserResponse
 import spray.json.DefaultJsonProtocol
 
@@ -24,5 +25,6 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val userResponseFormat = jsonFormat6(UserResponse)
   implicit val locationResponseFormat = jsonFormat5(LocationResponse)
   implicit val messageResponseFormat = jsonFormat5(MessageResponse)
+  implicit val searchResponseFormat = jsonFormat2(SearchResponse)
 
 }
