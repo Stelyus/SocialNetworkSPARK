@@ -1,5 +1,6 @@
 import java.time.Instant
 
+import scala.collection.JavaConversions._
 import com.sn.spark.Topic
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -19,6 +20,9 @@ import scala.concurrent.Future
 import com.sn.spark.core.producer._
 import java.io._
 
+import com.datastax.driver.core.utils.UUIDs
+
+import scala.io.Source
 import scala.util.Random
 
 object Main extends Directives with JsonSupport {
@@ -27,9 +31,19 @@ object Main extends Directives with JsonSupport {
   implicit val materializer = ActorMaterializer()
 
   def main(args: Array[String]): Unit = {
-
     Cassandra.init()
-    HDFS.script()
+//    HDFS.script()
+
+  //  BasicConfigurator.configure()
+
+    // INIT BEFORE SEND
+//    sendUser() // Creer 5000 utilisateurs dans Cassandra
+
+    sendPost()
+//    sendMessage()
+//    sendLike()
+//    sendLocation()
+
 
 
     // Init Producer for APIs Routes
@@ -63,90 +77,56 @@ object Main extends Directives with JsonSupport {
 
   def sendMessage(): Unit = {
 
-    val messageTopic: String = Topic.MessageToCassandra
-    val messageProducer: KafkaProducer[String, Array[Byte]] = MessageProducer.createProducer()
-    var i: Int = 0
-    // Send 100 Post on Topic posts-topic
-
-
-    val arrayUser: List[String] = List("Gabriel", "Adam", "Raphael", "Paul", "Louis", "Arthur", "Alexandre", "Victor",
-      "Jules", "Mohamed", "Lucas", "Joseph", "Antoine", "Gaspard", "Maxime")
-    val usersLength: Int = arrayUser.length
-
-
-    val arrayText: List[String] = List("Amazing picture",
-      "Sometimes you will never know the true value of a moment until it becomes a memory",
-      "All might is the best !",
-      "He is the worst friend ever",
-      "Wanna eat Kimchi ?",
-      "Want to go back to Korea ...")
-
-    val textsLength = arrayText.length
-
-    val r: Random = scala.util.Random
-
-
-    while (i < 100) {
-      MessageProducer.send[Message](
-        messageTopic,
-        Message(
-          Id[Message]("message" + i),
-          Instant.now(),
-          Id[User](arrayUser(r.nextInt(usersLength))),
-          Id[User](arrayUser(r.nextInt(usersLength))),
-          arrayText(r.nextInt(textsLength)),
-          deleted = false
-        ),
-        messageProducer
-      )
-
-      Thread.sleep(2000)
-      i += 1
-    }
-
-    messageProducer.close()
+//    val messageTopic: String = Topic.MessageToCassandra
+//    val messageProducer: KafkaProducer[String, Array[Byte]] = MessageProducer.createProducer()
+//    var i: Int = 0
+//    // Send 100 Post on Topic posts-topic
+//
+//
+//    val filename = "ListOfUserInCassandra"
+//    var user1 = ""
+//    var user2 = ""
+//
+//    for (user <- Source.fromFile(filename).getLines) {
+//      MessageProducer.send[Message](
+//        messageTopic,
+//        Message(
+//          Id[Message](UUIDs.timeBased().toString),
+//          Instant.now(),
+//          Id[User](user + "@gmail.com"),
+//          Id[User](user + "@gmail.com"),
+//          randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5),
+//          deleted = false
+//        ),
+//        messageProducer
+//      )
+//
+//      Thread.sleep(2000)
+//      i += 1
+//    }
+//
+//    messageProducer.close()
   }
 
   def sendPost(): Unit = {
     val postTopic: String = Topic.PostsToCassandra
 
     val postProducer: KafkaProducer[String, Array[Byte]] = PostProducer.createProducer()
-    var i: Int = 0
     // Send 100 Post on Topic posts-topic
 
 
-    val arrayUser: List[String] = List("Gabriel", "Adam", "Raphael", "Paul", "Louis", "Arthur", "Alexandre", "Victor",
-      "Jules", "Mohamed", "Lucas", "Joseph", "Antoine", "Gaspard", "Maxime")
-    val usersLength: Int = arrayUser.length
-
-
-    val arrayText: List[String] = List("Amazing picture",
-      "Sometimes you will never know the true value of a moment until it becomes a memory",
-      "All might is the best !",
-      "He is the worst friend ever",
-      "Wanna eat Kimchi ?",
-      "Want to go back to Korea ...")
-
-    val textsLength = arrayText.length
-
-    val r: Random = scala.util.Random
-
-
-    while (i < 100) {
+    val filename = "ListOfUserInCassandra"
+    for (user <- Source.fromFile(filename).getLines) {
       PostProducer.send[Post](
         postTopic,
         Post(
-          Id[Post]("post"+i),
+          Id[Post](UUIDs.timeBased().toString),
           Instant.now(),
-          Id[User](arrayUser(r.nextInt(usersLength))),
-          arrayText(r.nextInt(textsLength))
+          Id[User](user + "@gmail.com"),
+          randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5)
         ),
         postProducer
       )
-
-
-      Thread.sleep(2000)
-      i += 1
     }
 
     postProducer.close()
