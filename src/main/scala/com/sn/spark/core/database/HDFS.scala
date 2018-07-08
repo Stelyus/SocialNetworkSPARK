@@ -6,23 +6,16 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import java.text.SimpleDateFormat
 import java.util.Date
 import org.apache.spark.rdd.RDD
-import com.sn.spark.Topic
-import com.sn.spark.core.consumer._
-import org.apache.spark._
 import com.sn.spark.core.model._
-import com.sn.spark.core.producer._
-import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.apache.kafka.clients.producer.KafkaProducer
 
-import scala.collection.JavaConversions._
 
 object HDFS{
   val hdfs = "hdfs://localhost:9000"
 
   def saveToFile(path: String, base: String, table: String): Unit ={
     val fs = org.apache.hadoop.fs.FileSystem.get(new java.net.URI(hdfs), Cassandra.sc.hadoopConfiguration)
-    if(fs.exists(new org.apache.hadoop.fs.Path(path)))
-      fs.delete(new org.apache.hadoop.fs.Path(path),true)
+    if(fs.exists(new Path(path)))
+      fs.delete(new Path(path),true)
 
     val rdd = Cassandra.sc.cassandraTable(base, table)
     rdd.saveAsObjectFile(hdfs + path)
