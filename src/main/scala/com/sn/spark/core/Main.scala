@@ -11,14 +11,8 @@ import com.sn.spark.core.model._
 import com.sn.spark.core.model.{Id, Message, Post, User}
 import org.apache.kafka.clients.producer.KafkaProducer
 import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProducer, PostProducer}
-import com.sn.spark.core.api.routes.PostRoutes
-import com.sn.spark.core.api.routes._
 import com.sn.spark.core.api.utils.JsonSupport
 import com.sn.spark.core.database._
-import com.sn.spark.core.api.model.Response.UserResponse._
-
-import scala.concurrent.Future
-import com.sn.spark.core.coursier.ResolutionCoursier
 
 import scala.concurrent.Future
 import com.sn.spark.core.producer._
