@@ -89,20 +89,29 @@ object Cassandra {
     })
   }
 
+  val hdfs = "hdfs://localhost:9000"
+
   def saveToFile(path: String, base: String, table: String): Unit ={
-    val fs=FileSystem.get(Cassandra.sc.hadoopConfiguration)
-    if(fs.exists(new Path(path)))
-      fs.delete(new Path(path),true)
+    val fs = org.apache.hadoop.fs.FileSystem.get(new java.net.URI(hdfs), sc.hadoopConfiguration)
+    if(fs.exists(new org.apache.hadoop.fs.Path(path)))
+      fs.delete(new org.apache.hadoop.fs.Path(path),true)
 
     val rdd = sc.cassandraTable(base, table)
-    rdd.saveAsTextFile(path)
+    rdd.saveAsTextFile(hdfs + path)
+  }
+
+  def saveAllHDFS(base: String): Unit={
+    saveToFile("/data/HDFS_user", base, "user")
+    saveToFile("/data/HDFS_message", base, "message")
+    saveToFile("/data/HDFS_like", base, "like")
+    saveToFile("/data/HDFS_location", base, "location")
+    saveToFile("/data/HDFS_post", base, "post")
   }
 
   def readHDFS(path: String): RDD[String] = {
-    val lines = sc.textFile(path)
-//    lines.collect().foreach(println)
-    lines
+    sc.textFile(path)
   }
+
 
   def sendProfile(user: User) : Unit ={
     val collection = sc.parallelize(
@@ -131,8 +140,7 @@ object Cassandra {
   }
   def sendMessage(msg: Message) : Unit ={
     val collection = sc.parallelize(
-      Seq((msg.id.value, Date.from(msg.creationTime), msg.author, msg.receiver, msg.text))
-    )
+      Seq((msg.id.value, Date.from(msg.creationTime), msg.author.value, msg.receiver.value, msg.text)))
 
     collection.saveToCassandra("spark", "message",
       SomeColumns(
@@ -147,8 +155,7 @@ object Cassandra {
   }
   def sendLike(like: Like) : Unit ={
     val collection = sc.parallelize(
-      Seq((like.id.value, Date.from(like.creationTime), like.author, like.postId))
-    )
+      Seq((like.id.value, Date.from(like.creationTime), like.author.value, like.postId)))
 
     collection.saveToCassandra("spark", "like",
       SomeColumns(
@@ -162,8 +169,7 @@ object Cassandra {
   }
   def sendLocation(location: Location) : Unit ={
     val collection = sc.parallelize(
-      Seq((location.id.value, Date.from(location.creationTime), location.author, location.city, location.country))
-    )
+      Seq((location.id.value, Date.from(location.creationTime), location.author.value, location.city, location.country)))
 
     collection.saveToCassandra("spark", "location",
       SomeColumns(
@@ -178,8 +184,7 @@ object Cassandra {
   }
   def sendPost(post: Post) : Unit ={
     val collection = sc.parallelize(
-      Seq((post.id.value, Date.from(post.creationTime), post.author, post.text))
-    )
+      Seq((post.id.value, Date.from(post.creationTime), post.author.value, post.text)))
 
     collection.saveToCassandra("spark", "post",
       columns = SomeColumns(

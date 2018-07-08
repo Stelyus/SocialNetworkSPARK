@@ -36,19 +36,17 @@ object Main extends Directives with JsonSupport {
 //    sendLocation()
 
     // FIND A WAY TO GET THE RIGHT PATH FOR HOST COMPUTER
-//    val path = "/Users/berthierhadrien/Epita/spark/SocialNetworkSPARK/testCassandra"
-//    val usr = new User("jeani", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
 
     Cassandra.init()
-//    sendUser()
-//    val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
-//    Cassandra.sendProfile(usr)
-    //Cassandra.saveToFile(path, "spark", "user")
 
-//    Cassandra.readHDFS(path).collect().foreach(println)
+    val userPath = "/data/HDFS_user"
+    val messagePath = "/data/HDFS_message"
+    val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
+    val message = new Message(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d5"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "je suis a Burger king moi", false)
 
-    /*val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
-    Cassandra.sendProfile(usr)*/
+    //Cassandra.sendMessage(message)
+    //Cassandra.saveAllHDFS("spark")
+    Cassandra.readHDFS(Cassandra.hdfs + messagePath).collect().filter(_.contains("Auchan")).foreach(println)
 
 
     // Init Producer for APIs Routes
@@ -63,11 +61,11 @@ object Main extends Directives with JsonSupport {
     val LikeToCassandra = "send-like-to-cassandra"
     val UserToCassandra = "send-user-to-cassandra"
 
-    Http().bindAndHandle(PostRoutes.getRoute(postProducer, PostsToCassandra) ~
-      MessageRoutes.getRoute(messageProducer, MessageToCassandra) ~
-      LikeRoutes.getRoute(likeProducer, LikeToCassandra) ~
-      LocationRoutes.getRoute(locationProducer, LocationToCassandra) ~
-      UserRoutes.getRoute(userProducer,UserToCassandra ), "localhost", 8080)
+//    Http().bindAndHandle(PostRoutes.getRoute(postProducer, PostsToCassandra) ~
+//      MessageRoutes.getRoute(messageProducer, MessageToCassandra) ~
+//      LikeRoutes.getRoute(likeProducer, LikeToCassandra) ~
+//      LocationRoutes.getRoute(locationProducer, LocationToCassandra) ~
+//      UserRoutes.getRoute(userProducer,UserToCassandra ), "localhost", 8080)
 
     println(s"Server online at http://localhost:8080/")
 
