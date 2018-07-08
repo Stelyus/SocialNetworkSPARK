@@ -1,9 +1,12 @@
 package com.sn.spark.core.database
 
 import java.time.Instant
+
 import com.datastax.spark.connector._
 import org.apache.hadoop.fs.{FileSystem, Path}
 import java.util.Date
+
+import com.sn.spark.core.api.model.Response.{MessageResponseObject, PostResponseObject}
 import org.apache.spark.rdd.RDD
 import com.sn.spark.core.model._
 
@@ -22,22 +25,52 @@ object HDFS{
     rdd.saveAsObjectFile(hdfs + path)
   }
 
-  def search(dateFrom : Date, dateTo : Date, Brand: String, rdd: RDD[CassandraRow]): Unit ={
+  def searchBetweenTwoDate(dateFrom : Date, dateTo : Date, Brand: String): (RDD[MessageResponseObject.MessageResponse], RDD[PostResponseObject.PostResponse]) ={
     val rdd = readHDFS(hdfs + messagePath)
-    val rdd2 = readHDFS(hdfs + messagePath)
-    rdd.foreach(x =>
-      if (dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
-        dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date])) {
-        if (x.toString().contains(Brand)) {
-          println("yes" + x)
-        }
-        else{
-          println("nope the word isn't present" + x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)))
-        }
-      } else {
-        println("nope the date isn't good : " + x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date])
-      })
+    val rdd2 = readHDFS(hdfs + postPath)
 
+    val messageRes = rdd.filter(x => dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
+      dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) && x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
+
+    val postRes = rdd2.filter(x => dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
+      dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) && x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+
+    (messageRes, postRes)
+  }
+
+  def searchAfterDate(dateFrom : Date, Brand: String): (RDD[MessageResponseObject.MessageResponse], RDD[PostResponseObject.PostResponse]) ={
+    val rdd = readHDFS(hdfs + messagePath)
+    val rdd2 = readHDFS(hdfs + postPath)
+
+    val messageRes = rdd.filter(x => dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
+      x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
+
+    val postRes = rdd2.filter(x => dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
+      x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+
+    (messageRes, postRes)
+  }
+
+  def searchBeforeDate(dateTo : Date, Brand: String): (RDD[MessageResponseObject.MessageResponse], RDD[PostResponseObject.PostResponse]) ={
+    val rdd = readHDFS(hdfs + messagePath)
+    val rdd2 = readHDFS(hdfs + postPath)
+
+    val messageRes = rdd.filter(x => dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) && x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
+
+    val postRes = rdd2.filter(x => dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) && x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+
+    (messageRes, postRes)
+  }
+
+  def searchForever(Brand: String): (RDD[MessageResponseObject.MessageResponse], RDD[PostResponseObject.PostResponse]) ={
+    val rdd = readHDFS(hdfs + messagePath)
+    val rdd2 = readHDFS(hdfs + postPath)
+
+    val messageRes = rdd.filter(x => x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
+
+    val postRes = rdd2.filter(x => x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+
+    (messageRes, postRes)
   }
 
   def saveAllHDFS(base: String): Unit={
@@ -57,12 +90,17 @@ object HDFS{
 
     val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
     val message = new Message(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d5"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "je suis a Burger king moi", false)
-
+    val post = new Post(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d7"),Instant.now(),  Id[User]("jojo3@gmail.com"), "j'aime le Auchan de cherbourg")
     //Cassandra.sendMessage(message)
-    //saveAllHDFS("spark")
     //filter(_.contains("Auchan"))foreach(println)
+//    Cassandra.sendPost(post)
+//    saveAllHDFS("spark")
+
     val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
 
-    search(format.parse("2018-07-06"), format.parse("2018-07-09"), "Auchan", rdd)
+//    format.parse("2018-07-06")
+    val t = searchAfterDate(format.parse("2018-07-06"), "Auchan")
+    t._1.foreach(println)
+    t._2.foreach(println)
   }
 }
