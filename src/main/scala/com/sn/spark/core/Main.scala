@@ -31,7 +31,7 @@ object Main extends Directives with JsonSupport {
     Logger.getLogger("akka").setLevel(Level.OFF)
 
     Cassandra.init()
-
+    GenerateData.startThread()
     // Init Producer for APIs Routes
     val postProducer = PostProducer.createProducer()
     val messageProducer = PostProducer.createProducer()
