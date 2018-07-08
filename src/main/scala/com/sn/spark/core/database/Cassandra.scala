@@ -1,3 +1,4 @@
+package com.sn.spark.core.database
 import java.time.Instant
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.writer.WriteConf

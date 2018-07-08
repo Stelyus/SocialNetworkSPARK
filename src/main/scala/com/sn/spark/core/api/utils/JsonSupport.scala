@@ -17,7 +17,7 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   // Response To JSON
   implicit val postResponseFormat = jsonFormat4(PostResponse)
   implicit val likeResponseFormat = jsonFormat4(LikeResponse)
-  implicit val userResponseFormat = jsonFormat6(UserResponse)
+  implicit val userResponseFormat = jsonFormat6(UserResponse.UserResponse)
   implicit val locationResponseFormat = jsonFormat5(LocationResponse)
   implicit val messageResponseFormat = jsonFormat5(MessageResponse)
 

@@ -9,14 +9,16 @@ import akka.stream.ActorMaterializer
 import com.sn.spark.core.model._
 import com.sn.spark.core.model.{Id, Message, Post, User}
 import org.apache.kafka.clients.producer.KafkaProducer
-
 import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProducer, PostProducer}
 import com.sn.spark.core.api.routes.PostRoutes
 import com.sn.spark.core.api.routes._
 import com.sn.spark.core.api.utils.JsonSupport
-import scala.concurrent.Future
+import com.sn.spark.core.database.Cassandra
+import com.sn.spark.core.api.model.Response.UserResponse._
 
+import scala.concurrent.Future
 import com.sn.spark.core.producer._
+
 import scala.util.Random
 
 object Main extends Directives with JsonSupport {
@@ -34,6 +36,21 @@ object Main extends Directives with JsonSupport {
 
     Cassandra.init()
     HDFS.script()
+//    sendUser()
+//    val usr = new User("jean", "bernard", "jojo4@gmail.com", "jojo", Instant.now(), false)
+//    Cassandra.sendProfile(usr)
+    //Cassandra.saveToFile(path, "spark", "user")
+
+    val userPath = "/data/HDFS_user"
+    val messagePath = "/data/HDFS_message"
+    val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
+    val message = new Message(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d5"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "je suis a Burger king moi", false)
+
+    //Cassandra.sendMessage(message)
+    Cassandra.saveAllHDFS("spark")
+
+    Cassandra.readHDFS(Cassandra.hdfs + userPath).map(toUserResponse).foreach(System.out.println)
+
 
     // Init Producer for APIs Routes
     val postProducer = PostProducer.createProducer()
