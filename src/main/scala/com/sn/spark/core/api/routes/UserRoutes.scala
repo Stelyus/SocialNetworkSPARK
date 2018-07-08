@@ -6,7 +6,9 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives
 import com.datastax.driver.core.utils.UUIDs
 import com.sn.spark.core.api.model.Request.UserRequest
+import com.sn.spark.core.api.model.Response.UserResponseObject.UserResponse
 import com.sn.spark.core.api.utils.JsonSupport
+import com.sn.spark.core.database.table.UserTable
 import com.sn.spark.core.model.User
 import com.sn.spark.core.producer.UserProducer
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -16,11 +18,15 @@ object UserRoutes extends Directives with JsonSupport{
   def getRoute(producer: KafkaProducer[String, Array[Byte]], str: String) = {
     pathPrefix("api") {
       pathPrefix("user") {
-        path("id" / IntNumber) { id =>
           get {
-            complete {
-              "Received GET request for id " + id
-            }
+            parameter("mail") { (m) =>
+              System.out.println("Mail: " + m)
+              val l: UserResponse = UserTable.getById(m)
+              System.out.println("Result Mail: "  + l);
+              if (l == null)
+                complete(StatusCodes.NotFound)
+              else
+                complete(l)
           }
         }
       } ~ {

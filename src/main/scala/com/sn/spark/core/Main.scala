@@ -39,7 +39,7 @@ object Main extends Directives with JsonSupport {
     val locationProducer = PostProducer.createProducer()
     val userProducer = PostProducer.createProducer()
 
-    System.out.println("Results:" + UserTable.getById("jojo2@gmail.com"))
+    System.out.println("Results:" + UserTable.getById("jojo@gmail.com"))
 
 
     Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~

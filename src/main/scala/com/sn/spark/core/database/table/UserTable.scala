@@ -9,8 +9,9 @@ object UserTable {
   val userPath = "/data/HDFS_user"
 
   def getById(email: String): UserResponse = {
+    val emailCleaned = email.trim()
     val rowHDFS: RDD[UserResponse] = HDFS.readHDFS(HDFS.hdfs + userPath)
-      .map(x => toUserResponse(x)).filter(x => x.email.equalsIgnoreCase(email))
+      .map(x => toUserResponse(x)).filter(x => x.email.equalsIgnoreCase(emailCleaned))
     if (rowHDFS.count() != 1) {
       val row = Cassandra.sc.cassandraTable("spark", "user")
         .select(
@@ -23,8 +24,10 @@ object UserTable {
         )
         .where(
           "email = ?",
-          email
+          emailCleaned
         )
+      System.out.println(emailCleaned)
+      System.out.println("Result Size: " + row.count())
       if (row.count() == 1)
         toUserResponse(row.first())
       else
