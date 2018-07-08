@@ -34,8 +34,8 @@ object Main extends Directives with JsonSupport {
 //    sendLocation()
 
     // FIND A WAY TO GET THE RIGHT PATH FOR HOST COMPUTER
-    val path = "/Users/berthierhadrien/Epita/spark/SocialNetworkSPARK/testCassandra"
-    val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
+//    val path = "/Users/berthierhadrien/Epita/spark/SocialNetworkSPARK/testCassandra"
+//    val usr = new User("jeani", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
 
     Cassandra.init()
 //    sendUser()
@@ -43,7 +43,7 @@ object Main extends Directives with JsonSupport {
 //    Cassandra.sendProfile(usr)
     //Cassandra.saveToFile(path, "spark", "user")
 
-    // Cassandra.readHDFS(path).collect().foreach(println)
+//    Cassandra.readHDFS(path).collect().foreach(println)
 
     /*val usr = new User("jean", "bernard", "jojo@gmail.com", "jojo", Instant.now(), false)
     Cassandra.sendProfile(usr)*/
@@ -287,6 +287,4 @@ object Main extends Directives with JsonSupport {
     }
     userProducer.close()
   }
-
-
 }

@@ -1,6 +1,7 @@
 import java.util.Date
 
 import com.datastax.spark.connector._
+import com.datastax.spark.connector.writer.WriteConf
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.rdd.RDD
 import com.sn.spark.Topic
@@ -27,7 +28,6 @@ object Cassandra {
         while (true) {
           val records: ConsumerRecords[String, Array[Byte]] = locationConsumer.poll(1000)
           for (record <- records) {
-            System.out.println("key: " + record.key())
             val loc: Location = Location.deserialize(record.value())
             sendLocation(loc)
           }
@@ -42,7 +42,6 @@ object Cassandra {
         while (true) {
           val records: ConsumerRecords[String, Array[Byte]] = likeConsumer.poll(1000)
           for (record <- records) {
-            System.out.println("key: " + record.key())
             val lk: Like = Like.deserialize(record.value())
             sendLike(lk)
           }
@@ -56,7 +55,6 @@ object Cassandra {
         while (true) {
           val records: ConsumerRecords[String, Array[Byte]] = likeConsumer.poll(1000)
           for (record <- records) {
-            System.out.println("key: " + record.key())
             val post: Post = Post.deserialize(record.value())
             sendPost(post)
           }
@@ -70,7 +68,6 @@ object Cassandra {
         while (true) {
           val records: ConsumerRecords[String, Array[Byte]] = messageConsumer.poll(1000)
           for (record <- records) {
-            System.out.println("key: " + record.key())
             val msg: Message = Message.deserialize(record.value())
             sendMessage(msg)
           }
@@ -84,10 +81,8 @@ object Cassandra {
         while (true) {
           val records: ConsumerRecords[String, Array[Byte]] = userConsumer.poll(1000)
           for (record <- records) {
-            System.out.println("key: " + record.key())
             val usr: User = User.deserialize(record.value())
-            System.out.println(usr.toString())
-            //          sendProfile(usr)
+            sendProfile(usr)
           }
         }
       }
@@ -130,12 +125,14 @@ object Cassandra {
         "nickname",
         "email",
         "verified"
-      )
+      ),
+      writeConf = WriteConf(ifNotExists = true)
     )
   }
   def sendMessage(msg: Message) : Unit ={
     val collection = sc.parallelize(
-      Seq((msg.id.value, Date.from(msg.creationTime), msg.author, msg.receiver, msg.text)))
+      Seq((msg.id.value, Date.from(msg.creationTime), msg.author, msg.receiver, msg.text))
+    )
 
     collection.saveToCassandra("spark", "message",
       SomeColumns(
@@ -144,12 +141,14 @@ object Cassandra {
         "author",
         "receiver",
         "text"
-      )
+      ),
+      writeConf = WriteConf(ifNotExists = true)
     )
   }
   def sendLike(like: Like) : Unit ={
     val collection = sc.parallelize(
-      Seq((like.id.value, Date.from(like.creationTime), like.author, like.postId)))
+      Seq((like.id.value, Date.from(like.creationTime), like.author, like.postId))
+    )
 
     collection.saveToCassandra("spark", "like",
       SomeColumns(
@@ -157,12 +156,14 @@ object Cassandra {
         "creation_time",
         "author",
         "post_id"
-      )
+      ),
+      writeConf = WriteConf(ifNotExists = true)
     )
   }
   def sendLocation(location: Location) : Unit ={
     val collection = sc.parallelize(
-      Seq((location.id.value, Date.from(location.creationTime), location.author, location.city, location.country)))
+      Seq((location.id.value, Date.from(location.creationTime), location.author, location.city, location.country))
+    )
 
     collection.saveToCassandra("spark", "location",
       SomeColumns(
@@ -171,20 +172,23 @@ object Cassandra {
         "author",
         "city",
         "country"
-      )
+      ),
+      writeConf = WriteConf(ifNotExists = true)
     )
   }
   def sendPost(post: Post) : Unit ={
     val collection = sc.parallelize(
-      Seq((post.id.value, Date.from(post.creationTime), post.author, post.text)))
+      Seq((post.id.value, Date.from(post.creationTime), post.author, post.text))
+    )
 
     collection.saveToCassandra("spark", "post",
-      SomeColumns(
+      columns = SomeColumns(
         "id",
         "creation_time",
         "author",
         "text"
-      )
+      ),
+      writeConf = WriteConf(ifNotExists = true)
     )
   }
 }
