@@ -1,5 +1,5 @@
 import java.time.Instant
-
+import com.datastax.spark.connector._
 import scala.collection.JavaConversions._
 import com.sn.spark.Topic
 import akka.actor.ActorSystem
@@ -19,6 +19,7 @@ import com.sn.spark.core.database.table._
 import scala.concurrent.Future
 import com.sn.spark.core.producer._
 import java.io._
+import java.util.Date
 
 import com.datastax.driver.core.utils.UUIDs
 import org.apache.log4j.{Level, Logger}
@@ -36,7 +37,60 @@ object Main extends Directives with JsonSupport {
     Logger.getLogger("akka").setLevel(Level.OFF)
 
     Cassandra.init()
-    HDFS.script()
+//    HDFS.script()
+
+    val userThread = new Thread {
+      override def run() {
+        while (true) {
+          sendUser()
+          Thread.sleep(60000)
+        }
+      }
+    }
+//
+    val postThread = new Thread {
+      override def run() {
+        while (true) {
+          sendPost()
+          Thread.sleep(60000)
+        }
+      }
+    }
+
+    val messageThread = new Thread {
+      override def run() {
+        while (true) {
+          sendMessage()
+          Thread.sleep(60000)
+        }
+      }
+    }
+
+    val locationThread = new Thread {
+      override def run() {
+        while (true) {
+          sendLocation()
+          Thread.sleep(60000)
+        }
+      }
+    }
+
+    val likeThread = new Thread {
+      override def run() {
+        while (true) {
+          sendLike()
+          Thread.sleep(60000)
+        }
+      }
+    }
+
+
+    userThread.start()
+    postThread.start()
+    locationThread.start()
+    messageThread.start()
+    likeThread.start()
+
 
     // Init Producer for APIs Routes
     val postProducer = PostProducer.createProducer()
@@ -45,7 +99,7 @@ object Main extends Directives with JsonSupport {
     val locationProducer = PostProducer.createProducer()
     val userProducer = PostProducer.createProducer()
 
-    System.out.println("Results:" + UserTable.getById("jojo@gmail.com"))
+//    System.out.println("Results:" + UserTable.getById("jojo@gmail.com"))
 
 
     Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~
@@ -77,30 +131,25 @@ object Main extends Directives with JsonSupport {
     // Send 100 Post on Topic posts-topic
 
 
-    val filename = "ListOfUserInCassandra"
-    val seqUser = Source.fromFile(filename).getLines.toSeq
+    val res = Cassandra.sc.cassandraTable("spark", "user").select("email")
+
     val r: Random = scala.util.Random
+    val userArray = res.collect()
+    val userId1 = userArray(r.nextInt(userArray.length))
+    val userId2 = userArray(r.nextInt(userArray.length))
 
-
-    while (i < 1000) {
-      val user1 = seqUser(r.nextInt(seqUser.length))
-      val user2 = seqUser(r.nextInt(seqUser.length))
-
-      MessageProducer.send[Message](
-        messageTopic,
-        Message(
-          Id[Message](UUIDs.timeBased().toString),
-          Instant.now(),
-          Id[User](user1 + "@gmail.com"),
-          Id[User](user2 + "@gmail.com"),
-          randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5),
-          deleted = false
-        ),
-        messageProducer
-      )
-      i += 1
-    }
-
+    MessageProducer.send[Message](
+      messageTopic,
+      Message(
+        Id[Message](UUIDs.timeBased().toString),
+        Instant.now(),
+        Id[User](userId1.columnValues(0).toString),
+        Id[User](userId2.columnValues(0).toString),
+        randomAlpha(5) + ' ' + randomBrand() + ' ' + randomAlpha(5) + ' ' + randomAlpha(5),
+        deleted = false
+      ),
+      messageProducer
+    )
     messageProducer.close()
   }
 
@@ -108,22 +157,22 @@ object Main extends Directives with JsonSupport {
     val postTopic: String = Topic.PostsToCassandra
 
     val postProducer: KafkaProducer[String, Array[Byte]] = PostProducer.createProducer()
-    // Send 100 Post on Topic posts-topic
+    val res = Cassandra.sc.cassandraTable("spark", "user").select("email")
 
+    val r: Random = scala.util.Random
+    val userArray = res.collect()
+    val userId = userArray(r.nextInt(userArray.length))
 
-    val filename = "ListOfUserInCassandra"
-    for (user <- Source.fromFile(filename).getLines) {
-      PostProducer.send[Post](
-        postTopic,
-        Post(
-          Id[Post](UUIDs.timeBased().toString),
-          Instant.now(),
-          Id[User](user + "@gmail.com"),
-          randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5)
-        ),
-        postProducer
-      )
-    }
+    PostProducer.send[Post](
+      postTopic,
+      Post(
+        Id[Post](UUIDs.timeBased().toString),
+        Instant.now(),
+        Id[User](userId.columnValues(0).toString),
+        randomAlpha(5) + ' ' + randomBrand() + ' ' + randomAlpha(5) + ' ' + randomAlpha(5)
+      ),
+      postProducer
+    )
 
     postProducer.close()
   }
@@ -132,30 +181,28 @@ object Main extends Directives with JsonSupport {
     val likesTopic: String = Topic.LikeToCassandra
 
     val likeProducer: KafkaProducer[String, Array[Byte]] = LikeProducer.createProducer()
-    var i: Int = 0
     // Send 100 Post on Topic posts-topic
 
-    val filename = "ListOfUserInCassandra"
-    val seqUser = Source.fromFile(filename).getLines.toSeq
-
-    val post = "log.bat"
-    val seqPost = Source.fromFile(post).getLines.toSeq
+    val userRes = Cassandra.sc.cassandraTable("spark", "user").select("email")
+    val postRes = Cassandra.sc.cassandraTable("spark", "post").select("id")
 
     val r: Random = scala.util.Random
+    val userArray = userRes.collect()
+    val userId = userArray(r.nextInt(userArray.length))
 
-    while (i < 100) {
-      LikeProducer.send[Like](
-        likesTopic,
-        Like(
-          Id[Like](UUIDs.timeBased().toString),
-          Id[User](seqUser(r.nextInt(seqUser.size)) + "@gmail.com"),
-          Instant.now(),
-          Id[Post](seqPost(r.nextInt(seqPost.size)))
-        ),
-        likeProducer
-      )
-      i += 1
-    }
+    val postArray = postRes.collect()
+    val postId = postArray(r.nextInt(postArray.length))
+
+    LikeProducer.send[Like](
+      likesTopic,
+      Like(
+        Id[Like](UUIDs.timeBased().toString),
+        Id[User](userId.columnValues(0).toString),
+        Instant.now(),
+        Id[Post](postId.columnValues(0).toString())
+      ),
+      likeProducer
+    )
 
     likeProducer.close()
   }
@@ -164,66 +211,56 @@ object Main extends Directives with JsonSupport {
     val locTopic: String = Topic.LocationToCassandra
 
     val locProducer: KafkaProducer[String, Array[Byte]] = LocationProducer.createProducer()
-    var i: Int = 0
     // Send 100 Post on Topic posts-topic
 
-    val filename = "ListOfUserInCassandra"
-    val seqUser = Source.fromFile(filename).getLines.toSeq
+    val res = Cassandra.sc.cassandraTable("spark", "user").select("email")
 
     val r: Random = scala.util.Random
+    val userArray = res.collect()
+    val userId = userArray(r.nextInt(userArray.length))
 
-    while (i < 100) {
-      LocationProducer.send[Location](
-        locTopic,
-        Location(
-          Id[Location](UUIDs.timeBased().toString),
-          Instant.now(),
-          Id[User](seqUser(r.nextInt(seqUser.length)) + "@gmail.com"),
-          randomAlpha(5),
-          randomAlpha(5)
-        ),
-        locProducer
-      )
-      i += 1
-    }
+    LocationProducer.send[Location](
+      locTopic,
+      Location(
+        Id[Location](UUIDs.timeBased().toString),
+        Instant.now(),
+        Id[User](userId.columnValues(0).toString),
+        randomAlpha(5),
+        randomAlpha(5)
+      ),
+      locProducer
+    )
 
     locProducer.close()
   }
 
   def sendUser(): Unit = {
-    val file = new File("ListOfUserInCassandra")
-    val bw = new BufferedWriter(new FileWriter(file))
-
     val userTopic: String = Topic.UserToCassandra
     val userProducer: KafkaProducer[String, Array[Byte]] = UserProducer.createProducer()
-    var i: Int = 0
     // Send 100 Post on Topic posts-topic
 
-
-    while (i < 5000) {
-
-      val name = randomAlpha(12)
-      UserProducer.send[User](
-        userTopic,
-        User(
-          name,
-          name,
-          name + "@gmail.com",
-          name,
-          Instant.now(),
-          false
-        ),
-        userProducer
-      )
-      i += 1
-      bw.write(name + "\n")
-    }
-
-    bw.close()
+    val name = randomAlpha(12)
+    UserProducer.send[User](
+      userTopic,
+      User(
+        name,
+        name,
+        name + "@gmail.com",
+        name,
+        Instant.now(),
+        verified = false
+      ),
+      userProducer
+    )
     userProducer.close()
   }
 
 
+
+  def randomBrand(): String = {
+    val listBrand = List("Nike", "Adidas", "KFC", "Mcdonald", "HM", "BOSS", "Uniqlo", "Burger King", "7 eleven", "NY")
+    listBrand(Random.nextInt(listBrand.size))
+  }
 
   // Generate random characters
   def randomAlpha(length: Int): String = {
@@ -235,7 +272,7 @@ object Main extends Directives with JsonSupport {
   def randomStringFromCharList(length: Int, chars: Seq[Char]): String = {
     val sb = new StringBuilder
     for (i <- 1 to length) {
-      val randomNum = util.Random.nextInt(chars.length)
+      val randomNum = Random.nextInt(chars.length)
       sb.append(chars(randomNum))
     }
     sb.toString
