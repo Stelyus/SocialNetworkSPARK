@@ -5,6 +5,8 @@ import com.datastax.spark.connector.writer.WriteConf
 import org.apache.hadoop.fs.{FileSystem, Path}
 import java.text.SimpleDateFormat
 import java.util.Date
+
+import com.sn.spark.core.database.Cassandra
 import org.apache.spark.rdd.RDD
 import com.sn.spark.core.model._
 
