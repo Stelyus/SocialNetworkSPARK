@@ -1,12 +1,11 @@
-import java.time.Instant
+package com.sn.spark.core.database
 
+
+import java.time.Instant
 import com.datastax.spark.connector._
-import com.datastax.spark.connector.writer.WriteConf
 import org.apache.hadoop.fs.{FileSystem, Path}
 import java.text.SimpleDateFormat
 import java.util.Date
-
-import com.sn.spark.core.database.Cassandra
 import org.apache.spark.rdd.RDD
 import com.sn.spark.core.model._
 
@@ -15,16 +14,16 @@ object HDFS{
   val hdfs = "hdfs://localhost:9000"
 
   def saveToFile(path: String, base: String, table: String): Unit ={
-    val fs = org.apache.hadoop.fs.FileSystem.get(new java.net.URI(hdfs), Cassandra.sc.hadoopConfiguration)
+    val fs = FileSystem.get(new java.net.URI(hdfs), Cassandra.sc.hadoopConfiguration)
     if(fs.exists(new Path(path)))
       fs.delete(new Path(path),true)
 
     val rdd = Cassandra.sc.cassandraTable(base, table)
     rdd.saveAsObjectFile(hdfs + path)
   }
-  def search(date : Date, rdd: RDD[CassandraRow]): Unit ={
+  def search(dateFrom : Date, dateTo : Date, rdd: RDD[CassandraRow]): Unit ={
     rdd.foreach(x =>
-      if (date.before(x.columnValues(1).asInstanceOf[Date])) {
+      if (dateFrom.before(x.columnValues(1).asInstanceOf[Date])) {
         println(x)
       } else {
         println("nope")
@@ -53,6 +52,6 @@ object HDFS{
     val rdd = readHDFS(hdfs + userPath)//filter(_.contains("Auchan"))foreach(println)
     val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
 
-    search(format.parse("2020-07-18"), rdd)
+    search(format.parse("2010-07-18"), format.parse("2010-07-18"), rdd)
   }
 }
