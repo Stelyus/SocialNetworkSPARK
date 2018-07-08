@@ -1,5 +1,8 @@
 import java.time.Instant
+
+import GenerateData.sendPost
 import com.datastax.spark.connector._
+
 import scala.collection.JavaConversions._
 import com.sn.spark.Topic
 import akka.actor.ActorSystem
@@ -17,7 +20,6 @@ import com.sn.spark.core.database.{Cassandra, HDFS}
 import com.sn.spark.core.database.table._
 
 import scala.concurrent.Future
-
 import org.apache.log4j.{Level, Logger}
 
 
@@ -25,6 +27,15 @@ object Main extends Directives with JsonSupport {
   implicit val system = ActorSystem("my-system")
   implicit val executor = system.dispatcher
   implicit val materializer = ActorMaterializer()
+
+  val frozeDataThread = new Thread {
+    override def run() {
+      while (true) {
+        Thread.sleep(1000 * 60 * 60)
+        HDFS.saveAllHDFS("spark") 
+      }
+    }
+  }
 
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org").setLevel(Level.OFF)
@@ -46,6 +57,8 @@ object Main extends Directives with JsonSupport {
       LocationRoutes.getRoute(locationProducer, Topic.LocationToCassandra) ~
       UserRoutes.getRoute(userProducer,Topic.UserToCassandra) ~
       SearchRoutes.getRoute(), "localhost", 8080)
+
+    frozeDataThread.run()
 
     println(s"Server online at http://localhost:8080/")
   }
