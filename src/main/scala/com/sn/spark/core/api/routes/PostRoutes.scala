@@ -32,7 +32,7 @@ object PostRoutes extends Directives with JsonSupport {
               PostProducer.send[Post](str,
                 Post(Id[Post](id), Instant.now() , Id[User](postRequest.author), postRequest.text),
                 producer)
-              System.out.println(postRequest.toString)
+              System.out.println(id)
               complete(StatusCodes.Created)
             }
           }

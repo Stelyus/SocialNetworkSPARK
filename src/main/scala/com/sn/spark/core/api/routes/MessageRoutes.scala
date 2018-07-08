@@ -32,7 +32,7 @@ object MessageRoutes extends Directives with JsonSupport {
                 Message(Id[Message](id), Instant.now(), Id[User](msgRequest.receiver),
                   Id[User](msgRequest.author), msgRequest.text),
                 producer)
-              System.out.println(msgRequest.toString)
+              System.out.println(id)
               complete(StatusCodes.Created)
             }
           }

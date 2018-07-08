@@ -2,8 +2,11 @@ package com.sn.spark.core.api.utils
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.sn.spark.core.api.model.Request._
+import com.sn.spark.core.api.model.Response.LikeResponseObject.LikeResponse
+import com.sn.spark.core.api.model.Response.LocationResponseObject.LocationResponse
+import com.sn.spark.core.api.model.Response.MessageResponseObject.MessageResponse
+import com.sn.spark.core.api.model.Response.PostResponseObject.PostResponse
 import com.sn.spark.core.api.model.Response.UserResponseObject.UserResponse
-import com.sn.spark.core.api.model.Response._
 import spray.json.DefaultJsonProtocol
 
 

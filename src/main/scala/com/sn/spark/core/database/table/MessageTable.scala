@@ -1,34 +1,33 @@
 package com.sn.spark.core.database.table
 
-import com.sn.spark.core.api.model.Response.UserResponseObject.{UserResponse, toUserResponse}
+import com.datastax.spark.connector._
+import com.sn.spark.core.api.model.Response.MessageResponseObject._
 import com.sn.spark.core.database.{Cassandra, HDFS}
 import org.apache.spark.rdd.RDD
 
 object MessageTable {
-/*  val messagePath = "/data/HDFS_message"
+  val messagePath = "/data/HDFS_message"
   def getById(id: String): MessageResponse  = {
     val rowHDFS: RDD[MessageResponse] = HDFS.readHDFS(HDFS.hdfs + messagePath)
-      .map(x => toUserResponse(x)).filter(x => x.id.equalsIgnoreCase(id))
+      .map(x => toMessageResponse(x)).filter(x => x.id.equalsIgnoreCase(id))
     if (rowHDFS.count() != 1) {
       val row = Cassandra.sc.cassandraTable("spark", "message")
         .select(
+          "id",
           "creation_time",
-          "firstname",
-          "lastname",
-          "nickname",
-          "email",
-          "verified"
+          "author",
+          "receiver",
+          "text"
         )
         .where(
-          "email = ?",
-          email
-        )
+          "id = ?",
+          id)
       if (row.count() == 1)
-        toUserResponse(row.first())
+        toMessageResponse(row.first())
       else
         null
     } else {
       rowHDFS.first()
     }
-  }*/
+  }
 }

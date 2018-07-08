@@ -12,14 +12,12 @@ import com.sn.spark.core.model.{Id, Message, Post, User}
 import org.apache.kafka.clients.producer.KafkaProducer
 import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProducer, PostProducer}
 import com.sn.spark.core.api.utils.JsonSupport
-
 import com.sn.spark.core.database.{Cassandra, HDFS}
-import com.sn.spark.core.database.table.UserTable
+import com.sn.spark.core.database.table._
 
 import scala.concurrent.Future
 import com.sn.spark.core.producer._
 import java.io._
-
 
 import scala.util.Random
 
@@ -42,6 +40,7 @@ object Main extends Directives with JsonSupport {
     val userProducer = PostProducer.createProducer()
 
     System.out.println("Results:" + UserTable.getById("jojo2@gmail.com"))
+
 
     Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~
       MessageRoutes.getRoute(messageProducer, Topic.MessageToCassandra) ~

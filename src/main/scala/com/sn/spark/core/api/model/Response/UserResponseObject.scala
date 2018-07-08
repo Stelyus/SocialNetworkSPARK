@@ -10,7 +10,6 @@ object UserResponseObject {
                                 nickname: String, verified: Boolean)
 
   def toUserResponse(x: CassandraRow): UserResponse  = {
-    val date: Date = new Date();
     UserResponse(x.columnValues(x.metaData.namesToIndex.getOrElse("email", 0)).toString,
       x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).toString,
       x.columnValues(x.metaData.namesToIndex.getOrElse("firstname", 0)).toString,
