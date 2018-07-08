@@ -131,21 +131,24 @@ object GenerateData {
     val userArray = userRes.collect()
     val userId = userArray(r.nextInt(userArray.length))
 
-    val postArray = postRes.collect()
-    val postId = postArray(r.nextInt(postArray.length))
+    if (postRes.count() > 0) {
+      val postArray = postRes.collect()
+      val postId = postArray(r.nextInt(postArray.length))
 
-    LikeProducer.send[Like](
-      likesTopic,
-      Like(
-        Id[Like](UUIDs.timeBased().toString),
-        Id[User](userId.columnValues(0).toString),
-        Instant.now(),
-        Id[Post](postId.columnValues(0).toString())
-      ),
-      likeProducer
-    )
 
-    likeProducer.close()
+      LikeProducer.send[Like](
+        likesTopic,
+        Like(
+          Id[Like](UUIDs.timeBased().toString),
+          Id[User](userId.columnValues(0).toString),
+          Instant.now(),
+          Id[Post](postId.columnValues(0).toString())
+        ),
+        likeProducer
+      )
+
+      likeProducer.close()
+    }
   }
 
   def sendLocation(): Unit = {
@@ -173,6 +176,7 @@ object GenerateData {
     )
 
     locProducer.close()
+
   }
 
   def sendUser(): Unit = {
