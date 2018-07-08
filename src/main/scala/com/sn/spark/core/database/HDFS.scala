@@ -71,43 +71,24 @@ object HDFS{
   def saveToFile(path: String, base: String, table: String): Unit ={
     val fs = FileSystem.get(new java.net.URI(hdfs), Cassandra.sc.hadoopConfiguration)
     if(fs.exists(new org.apache.hadoop.fs.Path(path))) {
-      println("TROUVEEEEEEEEEEEEEEEEEEEEEEEEEE")
-
-      println("old hdfs")
       val save = readHDFS(hdfs + path)
-      save.foreach(println)
+      save.saveToCassandra(base, table)
 
       fs.delete(new org.apache.hadoop.fs.Path(path), true)
-
-//      save.saveToCassandra(base, table)
-
-      println("cass")
       val rdd = Cassandra.sc.cassandraTable(base, table)
-      rdd.foreach(println)
-
-//      println("new")
-//      val newHDFS = rdd.union(save)
-//      newHDFS.foreach(println)
-//
-//      println("java rdd")
-//      val java = save.toJavaRDD().union(rdd.toJavaRDD())
-//      java.rdd.foreach(println)
-
       rdd.saveAsObjectFile(hdfs + path)
     }
     else{
-      println("PAS TROUVER")
       val rdd = Cassandra.sc.cassandraTable(base, table)
       rdd.saveAsObjectFile(hdfs + path)
     }
-
   }
 
   def saveAllHDFS(base: String): Unit={
-   //saveToFile("/data/HDFS_user", base, "user")
+    saveToFile("/data/HDFS_user", base, "user")
     saveToFile("/data/HDFS_message", base, "message")
-   // saveToFile("/data/HDFS_like", base, "like")
-   // saveToFile("/data/HDFS_location", base, "location")
+    saveToFile("/data/HDFS_like", base, "like")
+    saveToFile("/data/HDFS_location", base, "location")
     saveToFile("/data/HDFS_post", base, "post")
   }
 
@@ -118,16 +99,19 @@ object HDFS{
   def script(): Unit ={
     val userPath = "/data/HDFS_user"
 
-    val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
-    val message = new Message(Id("b1f70bd0-7fa1-11e2-a9f9-2f02517cf2f9"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "Auchan j aime pas", false)
-    val post = new Post(Id("b1f70be0-7fa1-11e9-a9f9-2f02517be4f7"),Instant.now(),  Id[User]("jojo3@gmail.com"), "je suis a Auchan")
+    val usr = new User("franck", "thang", "franck@gmail.com", "franck", Instant.now(), false)
+    val message = new Message(Id("b1f70bd0-7fa1-11e2-a9f9-2f02517cf2a9"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "Auchan j aime pas trop", false)
+    val post = new Post(Id("b1f70be0-7fa1-11e9-a9f9-2f02517be4a7"),Instant.now(),  Id[User]("jojo3@gmail.com"), "je suis a Auchan")
 
 //    Cassandra.sendMessage(message)
 //    Cassandra.sendPost(post)
+//    Cassandra.sendProfile(usr)
+
     saveAllHDFS("spark")
 
     println("Printing hdfs new value:")
     readHDFS(hdfs + messagePath).foreach(println)
+    readHDFS(hdfs + userPath).foreach(println)
     readHDFS(hdfs + postPath).foreach(println)
 
 //    val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
