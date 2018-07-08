@@ -21,10 +21,12 @@ object HDFS{
   }
   def search(dateFrom : Date, dateTo : Date, rdd: RDD[CassandraRow]): Unit ={
     rdd.foreach(x =>
-      if (dateFrom.before(x.columnValues(1).asInstanceOf[Date])) {
-        println(x)
+      if (dateFrom.before(x.columnValues(2).asInstanceOf[Date]) && dateTo.after(x.columnValues(2).asInstanceOf[Date])) {
+        if (x.contains("Auchan")) {
+          println("yes" + x)
+        }
       } else {
-        println("nope")
+        println("nope: " + x)
       })
   }
   def saveAllHDFS(base: String): Unit={
@@ -47,9 +49,9 @@ object HDFS{
 
     //Cassandra.sendMessage(message)
     //saveAllHDFS("spark")
-    val rdd = readHDFS(hdfs + userPath)//filter(_.contains("Auchan"))foreach(println)
+    val rdd = readHDFS(hdfs + messagePath)//filter(_.contains("Auchan"))foreach(println)
     val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
 
-    search(format.parse("2010-07-18"), format.parse("2010-07-18"), rdd)
+    search(format.parse("2018-07-06"), format.parse("2018-07-08"), rdd)
   }
 }
