@@ -5,12 +5,10 @@ import java.time.Instant
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives
 import com.datastax.driver.core.utils.UUIDs
-import com.sn.spark.core.api.model.PostRequest
 import com.sn.spark.core.api.model.Request.LikeRequest
-import com.sn.spark.core.api.routes.PostRoutes.{as, complete, entity, get, path, pathPrefix, post}
 import com.sn.spark.core.api.utils.JsonSupport
 import com.sn.spark.core.model.{Id, Like, Post, User}
-import com.sn.spark.core.producer.{LikeProducer, PostProducer}
+import com.sn.spark.core.producer.{LikeProducer}
 import org.apache.kafka.clients.producer.KafkaProducer
 
 
