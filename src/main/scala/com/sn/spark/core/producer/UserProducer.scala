@@ -10,8 +10,6 @@ object UserProducer extends Producer {
     data match {
       case x: User => val queueMessage = new ProducerRecord[String, Array[Byte]](topic, serialize(x))
         val f: Future[RecordMetadata] = producer.send(queueMessage)
-        System.out.println(f.isCancelled)
-        System.out.println(f.isDone);
       case _ => System.err.print("Data Type Error")
     }
   }

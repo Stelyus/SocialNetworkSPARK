@@ -1,4 +1,5 @@
 import java.time.Instant
+import scala.collection.JavaConversions._
 
 import com.sn.spark.Topic
 import akka.actor.ActorSystem
@@ -17,7 +18,12 @@ import com.sn.spark.core.database.Cassandra
 import com.sn.spark.core.api.model.Response.UserResponse._
 
 import scala.concurrent.Future
+import com.sn.spark.core.coursier.ResolutionCoursier
+
+import scala.concurrent.Future
 import com.sn.spark.core.producer._
+import java.io._
+
 
 import scala.util.Random
 
@@ -29,6 +35,9 @@ object Main extends Directives with JsonSupport {
   def main(args: Array[String]): Unit = {
   //  BasicConfigurator.configure()
 
+    // INIT BEFORE SEND
+    Cassandra.init()
+
 //    sendPost()
 //    sendMessage()
 //    sendLike()
@@ -37,35 +46,21 @@ object Main extends Directives with JsonSupport {
     Cassandra.init()
     HDFS.script()
 //    sendUser()
-//    val usr = new User("jean", "bernard", "jojo4@gmail.com", "jojo", Instant.now(), false)
-//    Cassandra.sendProfile(usr)
-    //Cassandra.saveToFile(path, "spark", "user")
-
-    val userPath = "/data/HDFS_user"
-    val messagePath = "/data/HDFS_message"
-    val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
-    val message = new Message(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d5"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "je suis a Burger king moi", false)
-
-    //Cassandra.sendMessage(message)
-    Cassandra.saveAllHDFS("spark")
-
-    Cassandra.readHDFS(Cassandra.hdfs + userPath).map(toUserResponse).foreach(System.out.println)
-
 
     // Init Producer for APIs Routes
-    val postProducer = PostProducer.createProducer()
-    val messageProducer = PostProducer.createProducer()
-    val likeProducer = PostProducer.createProducer()
-    val locationProducer = PostProducer.createProducer()
-    val userProducer = PostProducer.createProducer()
+//    val postProducer = PostProducer.createProducer()
+//    val messageProducer = PostProducer.createProducer()
+//    val likeProducer = PostProducer.createProducer()
+//    val locationProducer = PostProducer.createProducer()
+//    val userProducer = PostProducer.createProducer()
+//
+//    Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~
+//      MessageRoutes.getRoute(messageProducer, Topic.MessageToCassandra) ~
+//      LikeRoutes.getRoute(likeProducer, Topic.LikeToCassandra) ~
+//      LocationRoutes.getRoute(locationProducer, Topic.LocationToCassandra) ~
+//      UserRoutes.getRoute(userProducer,Topic.UserToCassandra), "localhost", 8080)
 
-    Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~
-      MessageRoutes.getRoute(messageProducer, Topic.MessageToCassandra) ~
-      LikeRoutes.getRoute(likeProducer, Topic.LikeToCassandra) ~
-      LocationRoutes.getRoute(locationProducer, Topic.LocationToCassandra) ~
-      UserRoutes.getRoute(userProducer,Topic.UserToCassandra), "localhost", 8080)
-
-    println(s"Server online at http://localhost:8080/")
+//    println(s"Server online at http://localhost:8080/")
 
   }
 
@@ -259,30 +254,53 @@ object Main extends Directives with JsonSupport {
   }
 
   def sendUser(): Unit = {
-    val userTopic: String = Topic.UserToCassandra
+    val file = new File("ListOfUserInCassandra")
+    val bw = new BufferedWriter(new FileWriter(file))
 
+    val userTopic: String = Topic.UserToCassandra
     val userProducer: KafkaProducer[String, Array[Byte]] = UserProducer.createProducer()
     var i: Int = 0
     // Send 100 Post on Topic posts-topic
 
 
-    val arrayUser: List[String] = List("Gabriel", "Adam", "Raphael", "Paul", "Louis", "Arthur", "Alexandre", "Victor",
-      "Jules", "Mohamed", "Lucas", "Joseph", "Antoine", "Gaspard", "Maxime")
+    while (i < 5000) {
 
-    for (user <- arrayUser) {
+      val name = randomAlpha(12)
       UserProducer.send[User](
         userTopic,
         User(
-          user,
-          user,
-          user + "@gmail.com",
-          user,
+          name,
+          name,
+          name + "@gmail.com",
+          name,
           Instant.now(),
           false
         ),
         userProducer
       )
+      i += 1
+      bw.write(name + "\n")
     }
+
+    bw.close()
     userProducer.close()
+  }
+
+
+
+  // Generate random characters
+  def randomAlpha(length: Int): String = {
+    val chars = ('a' to 'z') ++ ('A' to 'Z')
+    randomStringFromCharList(length, chars)
+  }
+
+
+  def randomStringFromCharList(length: Int, chars: Seq[Char]): String = {
+    val sb = new StringBuilder
+    for (i <- 1 to length) {
+      val randomNum = util.Random.nextInt(chars.length)
+      sb.append(chars(randomNum))
+    }
+    sb.toString
   }
 }

@@ -16,10 +16,10 @@ case class User(firstName: String, lastName: String,
                 email: String, nickname: String, creationTime: Instant, verified: Boolean = true) {
   override def toString(): String = {
     "fistName: " + firstName + System.lineSeparator() +
-    "lastName: " + firstName + System.lineSeparator() +
-    "email: " + firstName + System.lineSeparator() +
-    "nickname: " + firstName + System.lineSeparator() +
-    "author: " + creationTime.getEpochSecond + System.lineSeparator() +
+    "lastName: " + lastName + System.lineSeparator() +
+    "email: " + email + System.lineSeparator() +
+    "nickname: " + nickname + System.lineSeparator() +
+    "creation_time: " + creationTime.getEpochSecond + System.lineSeparator() +
     "verified: " + verified + System.lineSeparator()
   }
 }
