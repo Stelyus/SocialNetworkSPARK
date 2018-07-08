@@ -73,7 +73,6 @@ object Main extends Directives with JsonSupport {
 
 
     val filename = "ListOfUserInCassandra"
-    val arrayOfUser = List()
     val seqUser = Source.fromFile(filename).getLines.toSeq
     val r: Random = scala.util.Random
 
@@ -131,26 +130,25 @@ object Main extends Directives with JsonSupport {
     var i: Int = 0
     // Send 100 Post on Topic posts-topic
 
+    val filename = "ListOfUserInCassandra"
+    val seqUser = Source.fromFile(filename).getLines.toSeq
 
-    val arrayUser: List[String] = List("Gabriel", "Adam", "Raphael", "Paul", "Louis", "Arthur", "Alexandre", "Victor",
-      "Jules", "Mohamed", "Lucas", "Joseph", "Antoine", "Gaspard", "Maxime")
-    val usersLength: Int = arrayUser.length
+    val post = "log.bat"
+    val seqPost = Source.fromFile(post).getLines.toSeq
+
     val r: Random = scala.util.Random
 
     while (i < 100) {
       LikeProducer.send[Like](
         likesTopic,
         Like(
-          Id[Like]("like"+i),
-          Id[User](arrayUser(r.nextInt(usersLength))),
+          Id[Like](UUIDs.timeBased().toString),
+          Id[User](seqUser(r.nextInt(seqUser.size)) + "@gmail.com"),
           Instant.now(),
-          Id[Post]("post"+i)
+          Id[Post](seqPost(r.nextInt(seqPost.size)))
         ),
         likeProducer
       )
-
-
-      Thread.sleep(2000)
       i += 1
     }
 
@@ -164,49 +162,23 @@ object Main extends Directives with JsonSupport {
     var i: Int = 0
     // Send 100 Post on Topic posts-topic
 
-
-    val arrayUser: List[String] = List("Gabriel", "Adam", "Raphael", "Paul", "Louis", "Arthur", "Alexandre", "Victor",
-      "Jules", "Mohamed", "Lucas", "Joseph", "Antoine", "Gaspard", "Maxime")
-    val usersLength: Int = arrayUser.length
-
-    val cityCountryMap = Map(
-      "Paris" -> "France",
-      "Nice" -> "France",
-      "Marseille" -> "France",
-      "Tokyo" -> "Japon",
-      "New York" -> "USA",
-      "Saint-Barthelemy" -> "France",
-      "Shanghai" -> "Chine",
-      "Seoul" -> "Coree du Sud",
-      "Berlin" -> "Allemagne",
-      "Barcelone" -> "Espagne",
-      "Madrid" -> "Espagne",
-      "Taipei" -> "Taiwan",
-      "Moscou" -> "Russie"
-    )
-    val cityMapSize = cityCountryMap.size
+    val filename = "ListOfUserInCassandra"
+    val seqUser = Source.fromFile(filename).getLines.toSeq
 
     val r: Random = scala.util.Random
 
     while (i < 100) {
-      val city: String = cityCountryMap.keys.toSeq(r.nextInt(cityMapSize))
-      val country: String = cityCountryMap.getOrElse(city, "Undefined")
-
-
       LocationProducer.send[Location](
         locTopic,
         Location(
-          Id[Location]("location"+i),
+          Id[Location](UUIDs.timeBased().toString),
           Instant.now(),
-          Id[User](arrayUser(r.nextInt(usersLength))),
-          city,
-          country
+          Id[User](seqUser(r.nextInt(seqUser.length)) + "@gmail.com"),
+          randomAlpha(5),
+          randomAlpha(5)
         ),
         locProducer
       )
-
-
-      Thread.sleep(2000)
       i += 1
     }
 

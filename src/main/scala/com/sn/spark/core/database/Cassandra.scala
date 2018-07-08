@@ -214,7 +214,7 @@ object Cassandra {
   }
   def sendLike(like: Like) : Unit ={
     val collection = sc.parallelize(
-      Seq((like.id.value, Date.from(like.creationTime), like.author.value, like.postId)))
+      Seq((like.id.value, Date.from(like.creationTime), like.author.value, like.postId.value)))
 
     collection.saveToCassandra("spark", "like",
       SomeColumns(
@@ -238,8 +238,8 @@ object Cassandra {
         "id = ? AND creation_time = ? AND author = ? AND post_id = ?",
         like.id.value,
         Date.from(like.creationTime),
-        like.author,
-        like.postId
+        like.author.value,
+        like.postId.value
       )
 
     // If the result is correct then send to a new topic for all services who want to know if there is a new like in the db
@@ -278,7 +278,7 @@ object Cassandra {
         "id = ? AND creation_time = ? AND author = ? AND city = ? AND country = ?",
         location.id.value,
         Date.from(location.creationTime),
-        location.author,
+        location.author.value,
         location.city,
         location.country
       )
@@ -317,7 +317,7 @@ object Cassandra {
         "id = ? AND creation_time = ? AND author = ? AND text = ?",
         post.id.value,
         Date.from(post.creationTime),
-        post.author,
+        post.author.value,
         post.text
       )
 
