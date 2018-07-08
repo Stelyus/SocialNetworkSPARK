@@ -4,7 +4,8 @@ import java.time.Instant
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives
-import com.sn.spark.core.api.model.MessageRequest
+import com.datastax.driver.core.utils.UUIDs
+import com.sn.spark.core.api.model.Request.MessageRequest
 import com.sn.spark.core.api.utils.JsonSupport
 import com.sn.spark.core.model.{Id, Message, User}
 import com.sn.spark.core.producer.MessageProducer
@@ -26,8 +27,9 @@ object MessageRoutes extends Directives with JsonSupport {
         post {
           path("message") {
             entity(as[MessageRequest]) { msgRequest: MessageRequest =>
+              val id = UUIDs.timeBased().toString
               MessageProducer.send[Message](str,
-                Message(Id[Message]("1"), Instant.now(), Id[User](msgRequest.receiver),
+                Message(Id[Message](id), Instant.now(), Id[User](msgRequest.receiver),
                   Id[User](msgRequest.author), msgRequest.text),
                 producer)
               System.out.println(msgRequest.toString)

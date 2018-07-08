@@ -56,7 +56,7 @@ object Cassandra {
     PostConsumer.read(Topic.PostsToCassandra, postConsumer, new Runnable {
       override def run(): Unit = {
         while (true) {
-          val records: ConsumerRecords[String, Array[Byte]] = likeConsumer.poll(1000)
+          val records: ConsumerRecords[String, Array[Byte]] = postConsumer.poll(1000)
           for (record <- records) {
             val post: Post = Post.deserialize(record.value())
             sendPost(post)
@@ -322,7 +322,7 @@ object Cassandra {
     if (res.count() == 1) {
       val postProducer: KafkaProducer[String, Array[Byte]] = PostProducer.createProducer()
       PostProducer.send[Post](Topic.LikeFromCassandra, post, postProducer)
-      postProducer
+      postProducer.close()
     }
   }
 }

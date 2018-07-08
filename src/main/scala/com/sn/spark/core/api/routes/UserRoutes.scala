@@ -4,10 +4,11 @@ import java.time.Instant
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives
-import com.sn.spark.core.api.model.{ UserRequest}
+import com.datastax.driver.core.utils.UUIDs
+import com.sn.spark.core.api.model.Request.UserRequest
 import com.sn.spark.core.api.utils.JsonSupport
-import com.sn.spark.core.model.{User}
-import com.sn.spark.core.producer.{UserProducer}
+import com.sn.spark.core.model.User
+import com.sn.spark.core.producer.UserProducer
 import org.apache.kafka.clients.producer.KafkaProducer
 
 

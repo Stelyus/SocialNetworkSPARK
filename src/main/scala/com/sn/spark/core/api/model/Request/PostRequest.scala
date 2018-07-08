@@ -1,5 +1,4 @@
-package com.sn.spark.core.api.model
-
+package com.sn.spark.core.api.model.Request
 
 case class PostRequest(author: String, text: String) {
   override def toString: String = {

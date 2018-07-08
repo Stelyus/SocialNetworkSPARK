@@ -49,8 +49,8 @@ object Main extends Directives with JsonSupport {
     val message = new Message(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d5"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "je suis a Burger king moi", false)
 
     //Cassandra.sendMessage(message)
-    //Cassandra.saveAllHDFS("spark")
-    Cassandra.readHDFS(Cassandra.hdfs + messagePath).collect().filter(_.contains("Auchan")).foreach(println)
+    Cassandra.saveAllHDFS("spark")
+    Cassandra.readHDFS(Cassandra.hdfs + userPath).foreach(println)
 
 
     // Init Producer for APIs Routes

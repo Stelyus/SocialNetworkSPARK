@@ -4,7 +4,8 @@ import java.time.Instant
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives
-import com.sn.spark.core.api.model.LocationRequest
+import com.datastax.driver.core.utils.UUIDs
+import com.sn.spark.core.api.model.Request.LocationRequest
 import com.sn.spark.core.api.utils.JsonSupport
 import com.sn.spark.core.model.{Id, Location, User}
 import com.sn.spark.core.producer.LocationProducer
@@ -25,8 +26,9 @@ object LocationRoutes extends Directives with JsonSupport {
         post {
           path("location") {
             entity(as[LocationRequest]) { locationRequest: LocationRequest =>
+              val id = UUIDs.timeBased().toString
               LocationProducer.send[Location](str,
-                Location(Id[Location]("1"), Instant.now(), Id[User](locationRequest.author),
+                Location(Id[Location](id), Instant.now(), Id[User](locationRequest.author),
                   locationRequest.city, locationRequest.country),
                 producer)
               System.out.println(locationRequest.toString)

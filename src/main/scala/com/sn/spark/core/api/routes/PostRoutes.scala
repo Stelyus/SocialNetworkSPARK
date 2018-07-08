@@ -3,7 +3,8 @@ import java.time.Instant
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives
-import com.sn.spark.core.api.model.PostRequest
+import com.datastax.driver.core.utils.UUIDs
+import com.sn.spark.core.api.model.Request.PostRequest
 import com.sn.spark.core.api.utils.JsonSupport
 import com.sn.spark.core.model.{Id, Post, User}
 import com.sn.spark.core.producer.PostProducer
@@ -26,8 +27,10 @@ object PostRoutes extends Directives with JsonSupport {
         post {
           path("post") {
             entity(as[PostRequest]) { postRequest: PostRequest =>
+              val id = UUIDs.timeBased().toString
+
               PostProducer.send[Post](str,
-                Post(Id[Post]("1"), Instant.now() , Id[User](postRequest.author), postRequest.text),
+                Post(Id[Post](id), Instant.now() , Id[User](postRequest.author), postRequest.text),
                 producer)
               System.out.println(postRequest.toString)
               complete(StatusCodes.Created)
