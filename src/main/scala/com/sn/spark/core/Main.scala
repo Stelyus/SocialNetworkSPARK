@@ -21,6 +21,7 @@ import com.sn.spark.core.producer._
 import java.io._
 
 import com.datastax.driver.core.utils.UUIDs
+import org.apache.log4j.{Level, Logger}
 
 import scala.io.Source
 import scala.util.Random
@@ -31,6 +32,9 @@ object Main extends Directives with JsonSupport {
   implicit val materializer = ActorMaterializer()
 
   def main(args: Array[String]): Unit = {
+    Logger.getLogger("org").setLevel(Level.OFF)
+    Logger.getLogger("akka").setLevel(Level.OFF)
+
     Cassandra.init()
     HDFS.script()
 
@@ -52,6 +56,7 @@ object Main extends Directives with JsonSupport {
       SearchRoutes.getRoute(), "localhost", 8080)
 
     println(s"Server online at http://localhost:8080/")
+
 
   }
 

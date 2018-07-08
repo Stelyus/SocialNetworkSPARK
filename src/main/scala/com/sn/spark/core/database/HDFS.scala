@@ -16,15 +16,6 @@ object HDFS{
   val messagePath = "/data/HDFS_message"
   val postPath = "/data/HDFS_post"
 
-  def saveToFile(path: String, base: String, table: String): Unit ={
-    val fs = FileSystem.get(new java.net.URI(hdfs), Cassandra.sc.hadoopConfiguration)
-    if(fs.exists(new Path(path)))
-      fs.delete(new Path(path),true)
-
-    val rdd = Cassandra.sc.cassandraTable(base, table)
-    rdd.saveAsObjectFile(hdfs + path)
-  }
-
   def searchBetweenTwoDate(dateFrom : Date, dateTo : Date, Brand: String): (RDD[MessageResponseObject.MessageResponse], RDD[PostResponseObject.PostResponse]) ={
     val rdd = readHDFS(hdfs + messagePath)
     val rdd2 = readHDFS(hdfs + postPath)
@@ -77,11 +68,46 @@ object HDFS{
     (messageRes, postRes)
   }
 
+  def saveToFile(path: String, base: String, table: String): Unit ={
+    val fs = FileSystem.get(new java.net.URI(hdfs), Cassandra.sc.hadoopConfiguration)
+    if(fs.exists(new org.apache.hadoop.fs.Path(path))) {
+      println("TROUVEEEEEEEEEEEEEEEEEEEEEEEEEE")
+
+      println("old hdfs")
+      val save = readHDFS(hdfs + path)
+      save.foreach(println)
+
+      fs.delete(new org.apache.hadoop.fs.Path(path), true)
+
+//      save.saveToCassandra(base, table)
+
+      println("cass")
+      val rdd = Cassandra.sc.cassandraTable(base, table)
+      rdd.foreach(println)
+
+//      println("new")
+//      val newHDFS = rdd.union(save)
+//      newHDFS.foreach(println)
+//
+//      println("java rdd")
+//      val java = save.toJavaRDD().union(rdd.toJavaRDD())
+//      java.rdd.foreach(println)
+
+      rdd.saveAsObjectFile(hdfs + path)
+    }
+    else{
+      println("PAS TROUVER")
+      val rdd = Cassandra.sc.cassandraTable(base, table)
+      rdd.saveAsObjectFile(hdfs + path)
+    }
+
+  }
+
   def saveAllHDFS(base: String): Unit={
-    saveToFile("/data/HDFS_user", base, "user")
+   //saveToFile("/data/HDFS_user", base, "user")
     saveToFile("/data/HDFS_message", base, "message")
-    saveToFile("/data/HDFS_like", base, "like")
-    saveToFile("/data/HDFS_location", base, "location")
+   // saveToFile("/data/HDFS_like", base, "like")
+   // saveToFile("/data/HDFS_location", base, "location")
     saveToFile("/data/HDFS_post", base, "post")
   }
 
@@ -93,18 +119,20 @@ object HDFS{
     val userPath = "/data/HDFS_user"
 
     val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
-    val message = new Message(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d5"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "je suis a Burger king moi", false)
-    val post = new Post(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d7"),Instant.now(),  Id[User]("jojo3@gmail.com"), "j'aime le Auchan de cherbourg")
-    //Cassandra.sendMessage(message)
-    //filter(_.contains("Auchan"))foreach(println)
+    val message = new Message(Id("b1f70bd0-7fa1-11e2-a9f9-2f02517cf2f9"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "Auchan j aime pas", false)
+    val post = new Post(Id("b1f70be0-7fa1-11e9-a9f9-2f02517be4f7"),Instant.now(),  Id[User]("jojo3@gmail.com"), "je suis a Auchan")
+
+//    Cassandra.sendMessage(message)
 //    Cassandra.sendPost(post)
-//    saveAllHDFS("spark")
+    saveAllHDFS("spark")
 
-    val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
+    println("Printing hdfs new value:")
+    readHDFS(hdfs + messagePath).foreach(println)
+    readHDFS(hdfs + postPath).foreach(println)
 
-//    format.parse("2018-07-06")
-    val t = searchAfterDate(format.parse("2018-07-06"), "Auchan")
-    t._1.foreach(println)
-    t._2.foreach(println)
+//    val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
+//    val t = searchAfterDate(format.parse("2018-07-06"), "Auchan")
+//    t._1.foreach(println)
+//    t._2.foreach(println)
   }
 }

@@ -24,6 +24,7 @@ object Cassandra {
     .set("spark.cassandra.connection.host", "localhost")
 
   val sc = new SparkContext(conf)
+  sc.setLogLevel("ERROR")
   val hdfs = "hdfs://localhost:9000"
 
 
