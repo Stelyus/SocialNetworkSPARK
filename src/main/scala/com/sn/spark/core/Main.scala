@@ -39,7 +39,7 @@ object Main extends Directives with JsonSupport {
     // INIT BEFORE SEND
 //    sendUser() // Creer 5000 utilisateurs dans Cassandra
 
-    sendPost()
+//    sendPost()
 //    sendMessage()
 //    sendLike()
 //    sendLocation()
@@ -77,35 +77,38 @@ object Main extends Directives with JsonSupport {
 
   def sendMessage(): Unit = {
 
-//    val messageTopic: String = Topic.MessageToCassandra
-//    val messageProducer: KafkaProducer[String, Array[Byte]] = MessageProducer.createProducer()
-//    var i: Int = 0
-//    // Send 100 Post on Topic posts-topic
-//
-//
-//    val filename = "ListOfUserInCassandra"
-//    var user1 = ""
-//    var user2 = ""
-//
-//    for (user <- Source.fromFile(filename).getLines) {
-//      MessageProducer.send[Message](
-//        messageTopic,
-//        Message(
-//          Id[Message](UUIDs.timeBased().toString),
-//          Instant.now(),
-//          Id[User](user + "@gmail.com"),
-//          Id[User](user + "@gmail.com"),
-//          randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5),
-//          deleted = false
-//        ),
-//        messageProducer
-//      )
-//
-//      Thread.sleep(2000)
-//      i += 1
-//    }
-//
-//    messageProducer.close()
+    val messageTopic: String = Topic.MessageToCassandra
+    val messageProducer: KafkaProducer[String, Array[Byte]] = MessageProducer.createProducer()
+    var i: Int = 0
+    // Send 100 Post on Topic posts-topic
+
+
+    val filename = "ListOfUserInCassandra"
+    val arrayOfUser = List()
+    val seqUser = Source.fromFile(filename).getLines.toSeq
+    val r: Random = scala.util.Random
+
+
+    while (i < 1000) {
+      val user1 = seqUser(r.nextInt(seqUser.length))
+      val user2 = seqUser(r.nextInt(seqUser.length))
+
+      MessageProducer.send[Message](
+        messageTopic,
+        Message(
+          Id[Message](UUIDs.timeBased().toString),
+          Instant.now(),
+          Id[User](user1 + "@gmail.com"),
+          Id[User](user2 + "@gmail.com"),
+          randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5) + ' ' + randomAlpha(5),
+          deleted = false
+        ),
+        messageProducer
+      )
+      i += 1
+    }
+
+    messageProducer.close()
   }
 
   def sendPost(): Unit = {
