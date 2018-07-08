@@ -1,5 +1,4 @@
 import java.time.Instant
-import scala.collection.JavaConversions._
 
 import com.sn.spark.Topic
 import akka.actor.ActorSystem
@@ -7,12 +6,15 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
+import com.sn.spark.core.api.routes._
 import com.sn.spark.core.model._
 import com.sn.spark.core.model.{Id, Message, Post, User}
 import org.apache.kafka.clients.producer.KafkaProducer
 import com.sn.spark.core.producer.{LikeProducer, LocationProducer, MessageProducer, PostProducer}
 import com.sn.spark.core.api.utils.JsonSupport
-import com.sn.spark.core.database._
+
+import com.sn.spark.core.database.{Cassandra, HDFS}
+import com.sn.spark.core.database.table.UserTable
 
 import scala.concurrent.Future
 import com.sn.spark.core.producer._
@@ -27,34 +29,27 @@ object Main extends Directives with JsonSupport {
   implicit val materializer = ActorMaterializer()
 
   def main(args: Array[String]): Unit = {
-  //  BasicConfigurator.configure()
-
-    // INIT BEFORE SEND
-    Cassandra.init()
-
-//    sendPost()
-//    sendMessage()
-//    sendLike()
-//    sendLocation()
 
     Cassandra.init()
     HDFS.script()
-//    sendUser()
+
 
     // Init Producer for APIs Routes
-//    val postProducer = PostProducer.createProducer()
-//    val messageProducer = PostProducer.createProducer()
-//    val likeProducer = PostProducer.createProducer()
-//    val locationProducer = PostProducer.createProducer()
-//    val userProducer = PostProducer.createProducer()
-//
-//    Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~
-//      MessageRoutes.getRoute(messageProducer, Topic.MessageToCassandra) ~
-//      LikeRoutes.getRoute(likeProducer, Topic.LikeToCassandra) ~
-//      LocationRoutes.getRoute(locationProducer, Topic.LocationToCassandra) ~
-//      UserRoutes.getRoute(userProducer,Topic.UserToCassandra), "localhost", 8080)
+    val postProducer = PostProducer.createProducer()
+    val messageProducer = PostProducer.createProducer()
+    val likeProducer = PostProducer.createProducer()
+    val locationProducer = PostProducer.createProducer()
+    val userProducer = PostProducer.createProducer()
 
-//    println(s"Server online at http://localhost:8080/")
+    System.out.println("Results:" + UserTable.getById("jojo2@gmail.com"))
+
+    Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~
+      MessageRoutes.getRoute(messageProducer, Topic.MessageToCassandra) ~
+      LikeRoutes.getRoute(likeProducer, Topic.LikeToCassandra) ~
+      LocationRoutes.getRoute(locationProducer, Topic.LocationToCassandra) ~
+      UserRoutes.getRoute(userProducer,Topic.UserToCassandra), "localhost", 8080)
+
+    println(s"Server online at http://localhost:8080/")
 
   }
 

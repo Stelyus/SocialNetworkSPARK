@@ -1,10 +1,8 @@
 package com.sn.spark.core.database
 
-
 import java.time.Instant
 import com.datastax.spark.connector._
 import org.apache.hadoop.fs.{FileSystem, Path}
-import java.text.SimpleDateFormat
 import java.util.Date
 import org.apache.spark.rdd.RDD
 import com.sn.spark.core.model._

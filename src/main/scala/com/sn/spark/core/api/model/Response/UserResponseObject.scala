@@ -5,7 +5,7 @@ import java.util.Date
 
 import com.datastax.spark.connector.CassandraRow
 
-object UserResponse {
+object UserResponseObject {
   final case class UserResponse(email: String, creation_time: String, fistName: String, lastName: String,
                                 nickname: String, verified: Boolean)
 

@@ -118,6 +118,7 @@ object Cassandra {
   }
 
   def sendProfile(user: User): Unit ={
+
     val collection = sc.parallelize(
       Seq(
         (

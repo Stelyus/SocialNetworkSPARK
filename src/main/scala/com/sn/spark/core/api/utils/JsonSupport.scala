@@ -2,6 +2,7 @@ package com.sn.spark.core.api.utils
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.sn.spark.core.api.model.Request._
+import com.sn.spark.core.api.model.Response.UserResponseObject.UserResponse
 import com.sn.spark.core.api.model.Response._
 import spray.json.DefaultJsonProtocol
 
@@ -17,7 +18,7 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   // Response To JSON
   implicit val postResponseFormat = jsonFormat4(PostResponse)
   implicit val likeResponseFormat = jsonFormat4(LikeResponse)
-  implicit val userResponseFormat = jsonFormat6(UserResponse.UserResponse)
+  implicit val userResponseFormat = jsonFormat6(UserResponse)
   implicit val locationResponseFormat = jsonFormat5(LocationResponse)
   implicit val messageResponseFormat = jsonFormat5(MessageResponse)
 
