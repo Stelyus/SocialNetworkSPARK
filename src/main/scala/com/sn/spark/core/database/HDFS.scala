@@ -20,16 +20,16 @@ object HDFS{
   val hdfs = "hdfs://localhost:9000"
 
   def saveToFile(path: String, base: String, table: String): Unit ={
-    val fs = org.apache.hadoop.fs.FileSystem.get(new java.net.URI(hdfs), sc.hadoopConfiguration)
+    val fs = org.apache.hadoop.fs.FileSystem.get(new java.net.URI(hdfs), Cassandra.sc.hadoopConfiguration)
     if(fs.exists(new org.apache.hadoop.fs.Path(path)))
       fs.delete(new org.apache.hadoop.fs.Path(path),true)
 
     val rdd = Cassandra.sc.cassandraTable(base, table)
     rdd.saveAsObjectFile(hdfs + path)
   }
-  def search(time : Date, rdd: RDD[CassandraRow]): Unit ={
+  def search(date : Date, rdd: RDD[CassandraRow]): Unit ={
     rdd.foreach(x =>
-      if (time.before(x.columnValues(1).asInstanceOf[Date])) {
+      if (date.before(x.columnValues(1).asInstanceOf[Date])) {
         println(x)
       } else {
         println("nope")
@@ -56,6 +56,8 @@ object HDFS{
     //Cassandra.sendMessage(message)
     //saveAllHDFS("spark")
     val rdd = readHDFS(hdfs + userPath)//filter(_.contains("Auchan"))foreach(println)
-    search(new Date(2017, 8, 8, 19,26, 30), rdd)
+    val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
+
+    search(format.parse("2020-07-18"), rdd)
   }
 }
