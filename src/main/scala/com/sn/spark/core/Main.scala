@@ -32,14 +32,13 @@ object Main extends Directives with JsonSupport {
 
     Cassandra.init()
     GenerateData.startThread()
+
     // Init Producer for APIs Routes
     val postProducer = PostProducer.createProducer()
     val messageProducer = PostProducer.createProducer()
     val likeProducer = PostProducer.createProducer()
     val locationProducer = PostProducer.createProducer()
     val userProducer = PostProducer.createProducer()
-
-
 
     Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~
       MessageRoutes.getRoute(messageProducer, Topic.MessageToCassandra) ~
@@ -49,8 +48,6 @@ object Main extends Directives with JsonSupport {
       SearchRoutes.getRoute(), "localhost", 8080)
 
     println(s"Server online at http://localhost:8080/")
-
-
   }
 
   def exitProgram(bindingFuture: Future[ServerBinding]): Unit = {

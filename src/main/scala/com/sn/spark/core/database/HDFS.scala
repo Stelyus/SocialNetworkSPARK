@@ -61,7 +61,7 @@ object HDFS{
 
     val messageRes = rdd.filter(x => x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
 
-    val postRes = rdd2.filter(x => x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+    val postRes =   rdd2.filter(x => x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
 
     (messageRes, postRes)
   }
@@ -75,10 +75,14 @@ object HDFS{
       fs.delete(new org.apache.hadoop.fs.Path(path), true)
       val rdd = Cassandra.sc.cassandraTable(base, table)
       rdd.saveAsObjectFile(hdfs + path)
+      if (table != "user")
+        rdd.deleteFromCassandra(base, table)
     }
     else{
       val rdd = Cassandra.sc.cassandraTable(base, table)
       rdd.saveAsObjectFile(hdfs + path)
+      if (table != "user")
+        rdd.deleteFromCassandra(base, table)
     }
   }
 
