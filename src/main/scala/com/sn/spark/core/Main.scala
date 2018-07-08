@@ -32,7 +32,7 @@ object Main extends Directives with JsonSupport {
 
   def main(args: Array[String]): Unit = {
     Cassandra.init()
-//    HDFS.script()
+    HDFS.script()
 
   //  BasicConfigurator.configure()
 

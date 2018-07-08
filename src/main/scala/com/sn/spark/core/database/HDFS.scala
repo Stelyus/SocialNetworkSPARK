@@ -30,10 +30,12 @@ object HDFS{
     val rdd2 = readHDFS(hdfs + postPath)
 
     val messageRes = rdd.filter(x => dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
-      dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) && x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
+      dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
+      x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
 
     val postRes = rdd2.filter(x => dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
-      dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) && x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+      dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
+      x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
 
     (messageRes, postRes)
   }
@@ -43,10 +45,10 @@ object HDFS{
     val rdd2 = readHDFS(hdfs + postPath)
 
     val messageRes = rdd.filter(x => dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
-      x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
+      x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
 
     val postRes = rdd2.filter(x => dateFrom.before(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
-      x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+      x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
 
     (messageRes, postRes)
   }
@@ -55,9 +57,11 @@ object HDFS{
     val rdd = readHDFS(hdfs + messagePath)
     val rdd2 = readHDFS(hdfs + postPath)
 
-    val messageRes = rdd.filter(x => dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) && x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
+    val messageRes = rdd.filter(x => dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
+      x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
 
-    val postRes = rdd2.filter(x => dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) && x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+    val postRes = rdd2.filter(x => dateTo.after(x.columnValues(x.metaData.namesToIndex.getOrElse("creation_time", 0)).asInstanceOf[Date]) &&
+      x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
 
     (messageRes, postRes)
   }
@@ -66,9 +70,9 @@ object HDFS{
     val rdd = readHDFS(hdfs + messagePath)
     val rdd2 = readHDFS(hdfs + postPath)
 
-    val messageRes = rdd.filter(x => x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
+    val messageRes = rdd.filter(x => x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => MessageResponseObject.toMessageResponse((x)))
 
-    val postRes = rdd2.filter(x => x.toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
+    val postRes = rdd2.filter(x => x.columnValues(x.metaData.namesToIndex.getOrElse("text", 0)).toString.toLowerCase.contains(Brand.toLowerCase)).map(x => PostResponseObject.toPostResponse((x)))
 
     (messageRes, postRes)
   }
