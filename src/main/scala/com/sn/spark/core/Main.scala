@@ -33,19 +33,7 @@ object Main extends Directives with JsonSupport {
   def main(args: Array[String]): Unit = {
     Cassandra.init()
     HDFS.script()
-
-  //  BasicConfigurator.configure()
-
-    // INIT BEFORE SEND
-//    sendUser() // Creer 5000 utilisateurs dans Cassandra
-
-//    sendPost()
-//    sendMessage()
-//    sendLike()
-//    sendLocation()
-
-
-
+    
     // Init Producer for APIs Routes
     val postProducer = PostProducer.createProducer()
     val messageProducer = PostProducer.createProducer()
