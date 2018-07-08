@@ -1,3 +1,4 @@
+import java.time.Instant
 import java.util.Date
 
 import com.datastax.spark.connector._
@@ -8,7 +9,9 @@ import com.sn.spark.Topic
 import com.sn.spark.core.consumer._
 import org.apache.spark._
 import com.sn.spark.core.model._
+import com.sn.spark.core.producer._
 import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.apache.kafka.clients.producer.KafkaProducer
 
 import scala.collection.JavaConversions._
 
@@ -112,8 +115,7 @@ object Cassandra {
     sc.textFile(path)
   }
 
-
-  def sendProfile(user: User) : Unit ={
+  def sendProfile(user: User): Unit ={
     val collection = sc.parallelize(
       Seq(
         (
@@ -137,6 +139,34 @@ object Cassandra {
       ),
       writeConf = WriteConf(ifNotExists = true)
     )
+
+
+    // Check if it has been inserted properly
+    val res = sc.cassandraTable("spark", "user")
+      .select(
+        "creation_time",
+        "firstname",
+        "lastname",
+        "nickname",
+        "email",
+        "verified"
+      )
+      .where(
+        "creation_time = ? AND firstname = ? AND lastname = ? AND nickname = ? AND email = ? AND verified = ?",
+        Date.from(user.creationTime),
+        user.firstName,
+        user.lastName,
+        user.nickname,
+        user.email,
+        user.verified
+      )
+
+    // If the result is correct then send to a new topic for all services who want to know if there is a new user in the db
+    if (res.count() == 1) {
+      val userProducer: KafkaProducer[String, Array[Byte]] = UserProducer.createProducer()
+      UserProducer.send[User](Topic.UserFromCassandra, user, userProducer)
+      userProducer.close()
+    }
   }
   def sendMessage(msg: Message) : Unit ={
     val collection = sc.parallelize(
@@ -152,6 +182,32 @@ object Cassandra {
       ),
       writeConf = WriteConf(ifNotExists = true)
     )
+
+    // Check if it has been inserted properly
+    val res = sc.cassandraTable("spark", "message")
+      .select(
+        "id",
+        "creation_time",
+        "author",
+        "receiver",
+        "text"
+      )
+      .where(
+        "id = ? AND creation_time = ? AND author = ? AND receiver = ? AND text = ?",
+        msg.id.value,
+        Date.from(msg.creationTime),
+        msg.author,
+        msg.receiver,
+        msg.text
+      )
+
+    // If the result is correct then send to a new topic for all services who want to know if there is a new message in the db
+    if (res.count() == 1) {
+      val messageProducer: KafkaProducer[String, Array[Byte]] = MessageProducer.createProducer()
+      MessageProducer.send[Message](Topic.MessageFromCassandra, msg, messageProducer)
+      messageProducer.close()
+    }
+
   }
   def sendLike(like: Like) : Unit ={
     val collection = sc.parallelize(
@@ -166,7 +222,31 @@ object Cassandra {
       ),
       writeConf = WriteConf(ifNotExists = true)
     )
+
+    // Check if it has been inserted properly
+    val res = sc.cassandraTable("spark", "like")
+      .select(
+        "id",
+        "creation_time",
+        "author",
+        "post_id"
+      )
+      .where(
+        "id = ? AND creation_time = ? AND author = ? AND post_id = ?",
+        like.id.value,
+        Date.from(like.creationTime),
+        like.author,
+        like.postId
+      )
+
+    // If the result is correct then send to a new topic for all services who want to know if there is a new like in the db
+    if (res.count() == 1) {
+      val likeProducer: KafkaProducer[String, Array[Byte]] = LikeProducer.createProducer()
+      LikeProducer.send[Like](Topic.LikeFromCassandra, like, likeProducer)
+      likeProducer.close()
+    }
   }
+
   def sendLocation(location: Location) : Unit ={
     val collection = sc.parallelize(
       Seq((location.id.value, Date.from(location.creationTime), location.author.value, location.city, location.country)))
@@ -181,8 +261,34 @@ object Cassandra {
       ),
       writeConf = WriteConf(ifNotExists = true)
     )
+
+    // Check if it has been inserted properly
+    val res = sc.cassandraTable("spark", "location")
+      .select(
+        "id",
+        "creation_time",
+        "author",
+        "city",
+        "country"
+      )
+      .where(
+        "id = ? AND creation_time = ? AND author = ? AND city = ? AND country = ?",
+        location.id.value,
+        Date.from(location.creationTime),
+        location.author,
+        location.city,
+        location.country
+      )
+
+    // If the result is correct then send to a new topic for all services who want to know if there is a new like in the db
+    if (res.count() == 1) {
+      val locationProducer: KafkaProducer[String, Array[Byte]] = LocationProducer.createProducer()
+      LocationProducer.send[Location](Topic.LikeFromCassandra, location, locationProducer)
+      locationProducer.close()
+    }
   }
-  def sendPost(post: Post) : Unit ={
+
+  def sendPost(post: Post) : Unit = {
     val collection = sc.parallelize(
       Seq((post.id.value, Date.from(post.creationTime), post.author.value, post.text)))
 
@@ -195,5 +301,28 @@ object Cassandra {
       ),
       writeConf = WriteConf(ifNotExists = true)
     )
+
+    // Check if it has been inserted properly
+    val res = sc.cassandraTable("spark", "post")
+      .select(
+        "id",
+        "creation_time",
+        "author",
+        "text"
+      )
+      .where(
+        "id = ? AND creation_time = ? AND author = ? AND text = ?",
+        post.id.value,
+        Date.from(post.creationTime),
+        post.author,
+        post.text
+      )
+
+    // If the result is correct then send to a new topic for all services who want to know if there is a new like in the db
+    if (res.count() == 1) {
+      val postProducer: KafkaProducer[String, Array[Byte]] = PostProducer.createProducer()
+      PostProducer.send[Post](Topic.LikeFromCassandra, post, postProducer)
+      postProducer
+    }
   }
 }

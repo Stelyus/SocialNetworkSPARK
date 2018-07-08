@@ -38,6 +38,10 @@ object Main extends Directives with JsonSupport {
     // FIND A WAY TO GET THE RIGHT PATH FOR HOST COMPUTER
 
     Cassandra.init()
+//    sendUser()
+//    val usr = new User("jean", "bernard", "jojo4@gmail.com", "jojo", Instant.now(), false)
+//    Cassandra.sendProfile(usr)
+    //Cassandra.saveToFile(path, "spark", "user")
 
     val userPath = "/data/HDFS_user"
     val messagePath = "/data/HDFS_message"
@@ -55,17 +59,12 @@ object Main extends Directives with JsonSupport {
     val likeProducer = PostProducer.createProducer()
     val locationProducer = PostProducer.createProducer()
     val userProducer = PostProducer.createProducer()
-    val LocationToCassandra = "send-location-to-cassandra"
-    val MessageToCassandra = "send-message-to-cassandra"
-    val PostsToCassandra = "send-posts-to-cassandra"
-    val LikeToCassandra = "send-like-to-cassandra"
-    val UserToCassandra = "send-user-to-cassandra"
 
-//    Http().bindAndHandle(PostRoutes.getRoute(postProducer, PostsToCassandra) ~
-//      MessageRoutes.getRoute(messageProducer, MessageToCassandra) ~
-//      LikeRoutes.getRoute(likeProducer, LikeToCassandra) ~
-//      LocationRoutes.getRoute(locationProducer, LocationToCassandra) ~
-//      UserRoutes.getRoute(userProducer,UserToCassandra ), "localhost", 8080)
+    Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~
+      MessageRoutes.getRoute(messageProducer, Topic.MessageToCassandra) ~
+      LikeRoutes.getRoute(likeProducer, Topic.LikeToCassandra) ~
+      LocationRoutes.getRoute(locationProducer, Topic.LocationToCassandra) ~
+      UserRoutes.getRoute(userProducer,Topic.UserToCassandra), "localhost", 8080)
 
     println(s"Server online at http://localhost:8080/")
 
@@ -74,7 +73,7 @@ object Main extends Directives with JsonSupport {
   def exitProgram(bindingFuture: Future[ServerBinding]): Unit = {
     bindingFuture.flatMap(_.unbind()) // trigger unbinding from the port
       .onComplete(_ => {
-      system.terminate();
+      system.terminate()
       sys.exit(0)
     })
     println("Exit")
