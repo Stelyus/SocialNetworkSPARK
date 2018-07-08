@@ -1,9 +1,9 @@
 import java.time.Instant
-import java.util.Date
-
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.writer.WriteConf
 import org.apache.hadoop.fs.{FileSystem, Path}
+import java.text.SimpleDateFormat
+import java.util.Date
 import org.apache.spark.rdd.RDD
 import com.sn.spark.Topic
 import com.sn.spark.core.consumer._
@@ -90,29 +90,6 @@ object Cassandra {
         }
       }
     })
-  }
-
-  val hdfs = "hdfs://localhost:9000"
-
-  def saveToFile(path: String, base: String, table: String): Unit ={
-    val fs = org.apache.hadoop.fs.FileSystem.get(new java.net.URI(hdfs), sc.hadoopConfiguration)
-    if(fs.exists(new org.apache.hadoop.fs.Path(path)))
-      fs.delete(new org.apache.hadoop.fs.Path(path),true)
-
-    val rdd = sc.cassandraTable(base, table)
-    rdd.saveAsTextFile(hdfs + path)
-  }
-
-  def saveAllHDFS(base: String): Unit={
-    saveToFile("/data/HDFS_user", base, "user")
-    saveToFile("/data/HDFS_message", base, "message")
-    saveToFile("/data/HDFS_like", base, "like")
-    saveToFile("/data/HDFS_location", base, "location")
-    saveToFile("/data/HDFS_post", base, "post")
-  }
-
-  def readHDFS(path: String): RDD[String] = {
-    sc.textFile(path)
   }
 
   def sendProfile(user: User): Unit ={

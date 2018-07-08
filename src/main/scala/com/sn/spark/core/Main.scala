@@ -32,23 +32,8 @@ object Main extends Directives with JsonSupport {
 //    sendLike()
 //    sendLocation()
 
-    // FIND A WAY TO GET THE RIGHT PATH FOR HOST COMPUTER
-
     Cassandra.init()
-//    sendUser()
-//    val usr = new User("jean", "bernard", "jojo4@gmail.com", "jojo", Instant.now(), false)
-//    Cassandra.sendProfile(usr)
-    //Cassandra.saveToFile(path, "spark", "user")
-
-    val userPath = "/data/HDFS_user"
-    val messagePath = "/data/HDFS_message"
-    val usr = new User("jean", "bernard", "jojo3@gmail.com", "jojo", Instant.now(), false)
-    val message = new Message(Id("b1f70be0-7fa1-11e8-a9f9-2f02517be4d5"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "je suis a Burger king moi", false)
-
-    //Cassandra.sendMessage(message)
-    Cassandra.saveAllHDFS("spark")
-    Cassandra.readHDFS(Cassandra.hdfs + userPath).foreach(println)
-
+    HDFS.script()
 
     // Init Producer for APIs Routes
     val postProducer = PostProducer.createProducer()
