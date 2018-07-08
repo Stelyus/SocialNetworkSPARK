@@ -1,6 +1,5 @@
 package com.sn.spark.core.database
 
-import java.time.Instant
 
 import com.datastax.spark.connector._
 import org.apache.hadoop.fs.{FileSystem, Path}
@@ -8,7 +7,6 @@ import java.util.Date
 
 import com.sn.spark.core.api.model.Response.{MessageResponseObject, PostResponseObject}
 import org.apache.spark.rdd.RDD
-import com.sn.spark.core.model._
 
 
 object HDFS{
@@ -97,26 +95,6 @@ object HDFS{
   }
 
   def script(): Unit ={
-    val userPath = "/data/HDFS_user"
-
-    val usr = new User("franck", "thang", "franck@gmail.com", "franck", Instant.now(), false)
-    val message = new Message(Id("b1f70bd0-7fa1-11e2-a9f9-2f02517cf2a9"), Instant.now(), Id[User]("jojo3@gmail.com"), Id[User]("jojo@gmail.com"), "Auchan j aime pas trop", false)
-    val post = new Post(Id("b1f70be0-7fa1-11e9-a9f9-2f02517be4a7"),Instant.now(),  Id[User]("jojo3@gmail.com"), "je suis a Auchan")
-
-//    Cassandra.sendMessage(message)
-//    Cassandra.sendPost(post)
-//    Cassandra.sendProfile(usr)
-
     saveAllHDFS("spark")
-
-    println("Printing hdfs new value:")
-    readHDFS(hdfs + messagePath).foreach(println)
-    readHDFS(hdfs + userPath).foreach(println)
-    readHDFS(hdfs + postPath).foreach(println)
-
-//    val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
-//    val t = searchAfterDate(format.parse("2018-07-06"), "Auchan")
-//    t._1.foreach(println)
-//    t._2.foreach(println)
   }
 }

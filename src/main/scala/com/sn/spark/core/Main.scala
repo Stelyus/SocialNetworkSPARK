@@ -17,15 +17,9 @@ import com.sn.spark.core.database.{Cassandra, HDFS}
 import com.sn.spark.core.database.table._
 
 import scala.concurrent.Future
-import com.sn.spark.core.producer._
-import java.io._
-import java.util.Date
 
-import com.datastax.driver.core.utils.UUIDs
 import org.apache.log4j.{Level, Logger}
 
-import scala.io.Source
-import scala.util.Random
 
 object Main extends Directives with JsonSupport {
   implicit val system = ActorSystem("my-system")
@@ -37,8 +31,6 @@ object Main extends Directives with JsonSupport {
     Logger.getLogger("akka").setLevel(Level.OFF)
 
     Cassandra.init()
-    GenerateData.startThread()
-//    HDFS.script()
 
     // Init Producer for APIs Routes
     val postProducer = PostProducer.createProducer()
@@ -47,7 +39,6 @@ object Main extends Directives with JsonSupport {
     val locationProducer = PostProducer.createProducer()
     val userProducer = PostProducer.createProducer()
 
-//    System.out.println("Results:" + UserTable.getById("jojo@gmail.com"))
 
 
     Http().bindAndHandle(PostRoutes.getRoute(postProducer, Topic.PostsToCassandra) ~

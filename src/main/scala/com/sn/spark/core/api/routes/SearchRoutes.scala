@@ -17,22 +17,30 @@ object SearchRoutes extends Directives with JsonSupport {
             path("from") {
               get {
                 parameter("q", "brand") { (q, brand) =>
-                  val l = HDFS.searchAfterDate(format.parse(q), brand)
-                  if (l._1.count() == 0 && l._2.count() == 0 )
-                    complete(StatusCodes.NotFound)
-                  else
-                    complete(SearchResponse(l._1.collect().toArray, l._2.collect().toArray))
+                  if (brand.length >= 2) {
+                    val l = HDFS.searchAfterDate(format.parse(q), brand)
+                    if (l._1.count() == 0 && l._2.count() == 0)
+                      complete(StatusCodes.NotFound)
+                    else
+                      complete(SearchResponse(l._1.collect().toArray, l._2.collect().toArray))
+                  } else {
+                    complete(StatusCodes.Forbidden, "size of brand >= 2")
+                  }
                 }
               }
             } ~ {
               path("to") {
                 get {
                   parameter("q", "brand") { (q, brand) =>
-                    val l = HDFS.searchBeforeDate(format.parse(q), brand)
-                    if (l._1.count() == 0 && l._2.count() == 0 )
-                      complete(StatusCodes.NotFound)
-                    else
-                      complete(SearchResponse(l._1.collect().toArray, l._2.collect().toArray))
+                    if (brand.length >= 2) {
+                      val l = HDFS.searchBeforeDate(format.parse(q), brand)
+                      if (l._1.count() == 0 && l._2.count() == 0 )
+                        complete(StatusCodes.NotFound)
+                      else
+                        complete(SearchResponse(l._1.collect().toArray, l._2.collect().toArray))
+                    } else {
+                      complete(StatusCodes.Forbidden, "size of brand >= 2")
+                    }
                   }
                 }
               }
@@ -40,12 +48,15 @@ object SearchRoutes extends Directives with JsonSupport {
               path("any") {
                 get {
                   parameter("from", "to", "brand") { (from, to, brand) =>
+                    if (brand.length >= 2) {
                     val l = HDFS.searchBetweenTwoDate(format.parse(from), format.parse(to), brand)
                     if (l._1.count() == 0 && l._2.count() == 0 )
                       complete(StatusCodes.NotFound)
                     else
                       complete(SearchResponse(l._1.collect().toArray, l._2.collect().toArray))
-
+                    } else {
+                      complete(StatusCodes.Forbidden, "size of brand >= 2")
+                    }
                   }
                 }
               }
@@ -53,11 +64,15 @@ object SearchRoutes extends Directives with JsonSupport {
           } ~ {
             get {
               parameter("brand") { (brand) =>
+                if (brand.length >= 2) {
                 val l = HDFS.searchForever(brand)
                 if (l._1.count() == 0 && l._2.count() == 0)
                   complete(StatusCodes.NotFound)
                 else
                   complete(SearchResponse(l._1.collect().toArray, l._2.collect().toArray))
+              } else {
+                  complete(StatusCodes.Forbidden, "size of brand >= 2")
+                }
               }
              }
             }
